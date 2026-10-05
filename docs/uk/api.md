@@ -3,7 +3,8 @@
 > Це переклад `docs/api.md`; першоджерелом є англійська версія.
 > Статус: **чернетка на розгляді** — частина набору проєктної документації
 > [architecture.md](architecture.md) · api.md (цей файл) · [cv-statuses.md](cv-statuses.md).
-> Схеми запитів і відповідей описано в `shared/src/api.ts` (Zod); їх використовують обидва застосунки.
+> Схеми запитів і відповідей описано в пакеті `@cv/shared` (`shared/src/api.ts`, поруч — схеми
+> чернетки, запитань і вимог; Zod); їх використовують обидва застосунки.
 
 ## Домовленості
 
@@ -51,23 +52,34 @@ type GenerationStage = 'drafting' | 'verifying' | 'revising' | 'saving';
 
 type CvData = {                                   // architecture.md §6.2
   contacts: { fullName: string | null; email: string | null; phone: string | null;
-              location: string | null; links: string[] };
+              location: string | null; links: string[] };              // ≤ 5 посилань
   summary: string | null;
   experience: { id: string; title: string | null; company: string | null;
-                period: string | null; bullets: string[] }[];
+                period: string | null; bullets: string[] }[];          // ≤ 10
+  projects: { id: string; name: string | null; period: string | null;
+              url: string | null; bullets: string[] }[];               // ≤ 6
   education: { id: string; institution: string | null; degree: string | null;
-               period: string | null }[];
-  skills: string[];
+               period: string | null }[];                              // ≤ 6
+  certifications: { id: string; name: string | null; issuer: string | null;
+                    year: string | null }[];                           // ≤ 10
+  skills: string[];                                                    // ≤ 40, без мов
+  languages: { id: string; name: string | null; level: string | null }[];   // ≤ 8
+  sectionOrder: MovableSection[];   // кожен із семи блоків під contacts рівно раз
 };
+
+type CvSection = 'contacts' | 'summary' | 'experience' | 'projects' | 'education'
+  | 'certifications' | 'skills' | 'languages';
+type MovableSection = Exclude<CvSection, 'contacts'>;   // contacts завжди перший
+type ItemSection = 'experience' | 'projects' | 'education' | 'certifications' | 'languages';
 
 type Requirement = {                              // architecture.md §7
   id: string; label: string; kind: 'skill' | 'experience'; keywords: string[];
 };
 
 type QuestionTarget = {
-  section: 'contacts' | 'summary' | 'experience' | 'education' | 'skills';
-  itemId?: string;                                // елемент experience / education
-  field?: string;                                 // напр. 'period', 'phone'
+  section: CvSection;                             // будь-який із восьми блоків
+  itemId?: string;                                // лише елемент ItemSection
+  field?: string;                                 // напр. 'period', 'phone', 'level'
 };
 
 type Question = {
@@ -103,7 +115,7 @@ type CvSummary = {                                // елемент списку
 };
 
 type Cv = CvStatusInfo & {
-  title: string; targetRole: string; roleNote: string | null; language: CvLanguage;
+  title: string; targetRole: string; roleContext: string | null; language: CvLanguage;
   sourceType: 'text' | 'pdf'; sourceFilename: string | null;
   data: CvData | null;                            // null до першої чернетки
   version: number;
@@ -118,6 +130,10 @@ type Cv = CvStatusInfo & {
 
 `match` у списку обчислюється на сервері тією самою функцією `computeMatch`, що й у редакторі;
 `sourceText` і `facts` ніколи не повертаються.
+
+Id елементів чернетки (`experience`, `projects`, …) для нових елементів **генерує клієнт**
+(`crypto.randomUUID()`); сервер перевіряє, що кожен — UUID і унікальний у межах чернетки (інакше
+`400`). Та сама схема `CvData` описує і запити, і відповіді.
 
 ---
 
@@ -179,21 +195,21 @@ Email очищується від пробілів на краях і перев
 Нове джерело:
 ```json
 { "targetRole": "Senior Backend Engineer",
-  "roleNote": "Fintech, Node.js + PostgreSQL, mentoring juniors",
+  "roleContext": "Fintech, Node.js + PostgreSQL, mentoring juniors",
   "language": "en",
   "sourceText": "…", "sourceType": "pdf", "sourceFilename": "olena-cv.pdf" }
 ```
 Інша роль на основі наявного резюме (чип запропонованої ролі):
 ```json
-{ "targetRole": "Node.js Tech Lead", "roleNote": null, "language": "uk", "fromCvId": "…" }
+{ "targetRole": "Node.js Tech Lead", "roleContext": null, "language": "uk", "fromCvId": "…" }
 ```
 
 | поле | правила |
 |---|---|
 | `targetRole` | обов'язкове, пробіли на краях обрізаються, 2–100 символів |
-| `roleNote` | необов'язкове, ≤ 1 000 символів |
+| `roleContext` | необов'язкове, ≤ 5 000 символів: коротка нотатка або вставлена вакансія. Описує роль (фокус, порядок, вимоги) і ніколи не є джерелом фактів про людину |
 | `language` | необов'язкове, одне зі значень `CvLanguage`, за замовчуванням `"en"`; резюме, його запитання й заголовки PDF — цією мовою; джерело може бути будь-якою мовою |
-| `sourceText` | 80–20 000 символів — **або** `fromCvId` (власне резюме з чернеткою; копіюються джерело + факти від користувача) |
+| `sourceText` | 80–20 000 символів — **або** `fromCvId` (власне резюме з чернеткою; копіюються джерело + факти від користувача); рівно одне з двох |
 | `sourceType` | `text` (за замовчуванням) \| `pdf` |
 | `sourceFilename` | необов'язкове, ≤ 200 символів, лише для відображення |
 
@@ -228,11 +244,18 @@ Email очищується від пробілів на краях і перев
 { "version": 4, "title": "Olena — Backend", "data": { /* повний CvData */ } }
 ```
 - Статус `needs_input` / `ready`, інакше `409 INVALID_STATE`.
-- `data` повністю замінює документ (валідується за `CvData`; елементи без `id` отримують його).
-  `title` необов'язковий (1–120 символів).
-- `version` ≠ збереженій → `409 VERSION_CONFLICT` (UI: «Змінено в іншій вкладці — завантажте
-  актуальну версію»).
-- `200 { "cv": Cv }` з `version + 1`. Статус не змінюється.
+- Тіло: `version` плюс `title` (1–120 символів), `data` або обидва. Тіло без жодного з них → `400`.
+- `data` повністю замінює документ, разом із `sectionOrder`, і валідується за `CvData`. Нові
+  елементи мають UUID, згенеровані клієнтом (див. *Спільні типи*).
+- Перед збереженням відкидаються елементи, у яких усі поля порожні, а також порожні пункти,
+  навички й посилання.
+- Відкриті запитання, ціль яких — елемент, якого вже немає в чернетці, стають `skipped`. Якщо
+  відкритих запитань не лишилося, резюме зі статусом `needs_input` стає `ready`, тож цей запит
+  може змінити статус.
+- Ручне заповнення поля не закриває запитання про нього; закриває лише відповідь або пропуск.
+- `version` ≠ збереженій → `409 VERSION_CONFLICT`, `details.currentVersion` (UI: «Змінено в
+  іншій вкладці — завантажте актуальну версію»).
+- `200 { "cv": Cv }` з `version + 1`.
 
 ### `DELETE /api/cvs/:id`
 `204`, у будь-якому статусі. Результат генерації, що саме виконується, відкидається (CAS).
@@ -260,8 +283,11 @@ Email очищується від пробілів на краях і перев
 { "kind": "confirm", "value": true }
 ```
 - Резюме в статусі `needs_input`, запитання в статусі `open` і саме цього `kind`, інакше
+  `409 INVALID_STATE`. Запитання, ціль якого вже не існує (його елемент видалено) →
   `409 INVALID_STATE`.
-- `value`/`other` ≤ 1 000 символів; `values` ⊆ `options`, ≥ 1 елемент, якщо не задано `other`.
+- `value`/`other` 1–1 000 символів; `choice` надсилає `value` (одне з `options`) **або** `other`;
+  `values` ⊆ `options`, ≥ 1 елемент, якщо не задано `other`. Інакше `400`.
+  (`answerSchemaFor(question)` у `@cv/shared`.)
 - Синхронний запит (зміни застосовуються, як описано в
   [architecture.md §6.5](architecture.md#65-питання-та-відповіді)); з увімкненим AnswerAgent
   запит може тривати до ~15 с.

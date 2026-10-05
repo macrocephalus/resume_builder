@@ -182,7 +182,7 @@ copied to `cvs`.
 |---|---|
 | unsent create form | browser only (form state, optional draft in `sessionStorage`) |
 | generation sub-steps | `stage` field, only for the progress text |
-| manual edits | new `version` of `data`; status unchanged |
+| manual edits | new `version` of `data`; status unchanged, except that removing an item skips its open questions and the last one closing moves `needs_input` → `ready` |
 | match score | computed from `data` + requirements on every render/read, never stored |
 | PDF | rendered on the fly, never stored |
 | deleted CV | row is gone (cascade to questions/jobs) |
