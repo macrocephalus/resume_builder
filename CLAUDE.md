@@ -141,9 +141,8 @@ main ──●────────────●─────────
 
 Lifecycle of a branch:
 
-1. **Start** from an up-to-date `main`:
-   `git switch main && git pull --ff-only` (once a remote exists), then
-   `git switch -c feat/<short-desc>`.
+1. **Start** from an up-to-date `main`: `pnpm pull` from the root (all three repos), then in
+   the repo you work in (root or a submodule) `git switch -c feat/<short-desc>`.
 2. **Work** in atomic commits (see *Commit procedure* below).
 3. **Sync** with `main` by rebasing, never by merging `main` into the branch:
    `git fetch && git rebase origin/main` (or `git rebase main` locally). Fix conflicts, re-run checks.
