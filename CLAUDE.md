@@ -40,7 +40,7 @@ glossary, ADRs and tracker, and runs on its own.
 - `backend/` — NestJS + Drizzle + Vercel AI SDK v7 (Anthropic); `backend/CLAUDE.md`. Git submodule.
   Not scaffolded yet.
 - `shared/` — Zod schemas, CV status machine, `computeMatch`: the contract in code, imported by
-  both apps; `shared/CLAUDE.md`. Not scaffolded yet.
+  both apps; `shared/CLAUDE.md`.
 - `docs/` — task spec and the design set (draft, under review with the user):
   - `docs/architecture.md` — components, stack, data model, generation pipeline, match, frontend
   - `docs/api.md` — REST contract
