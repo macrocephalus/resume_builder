@@ -350,7 +350,8 @@ mutation an inline error, `401` returns to login.
   wrong password.
 - Every CV belongs to one user; someone else's CV ⇒ `404`, not `403`.
 - Limits: 10 generations/user/hour, ≤ 2 in progress per user, 60 answers/hour, ingest 20/min →
-  `429` + `Retry-After`.
+  `429` + `Retry-After`. A generation is what the user starts — creating a CV or a manual Retry;
+  automatic retries of a failed attempt don't count.
 - Known simplifications (README): JWT can't be revoked before expiry; signup reveals that an email
   is taken; count-then-insert race on limits is accepted.
 - How it is enforced: `backend/docs/architecture.md` §6.
