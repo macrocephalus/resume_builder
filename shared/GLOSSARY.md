@@ -48,6 +48,14 @@ _Avoid_: related role, alternative role, recommendation
 The CV a new one is started from for a suggested role; the new CV reuses its source and facts and is otherwise independent of it.
 _Avoid_: original CV, base CV, template
 
+**Claim**:
+A statement about the person in a draft — a bullet, a title, a date, a skill; it must rest on the source or on a fact, otherwise it becomes a question.
+_Avoid_: fact, statement, assertion
+
+**Requirement**:
+Something the target role needs, with the words that show it in a CV; how many of them a CV covers is its match.
+_Avoid_: keyword, criterion, skill gap
+
 **Role context**:
 Optional free text about the target role — a short note or a pasted vacancy; it describes the role, never the person, so it is not a source of facts.
 _Avoid_: role note, job description, vacancy

@@ -285,10 +285,10 @@ An AnswerAgent that rewrites the summary or a bullet around the answer was desig
 
 ### 6.6 Keeping the AI from inventing facts
 
-Every *fact* in the CV must be traceable to `source_text` or `facts`. The server checks each
-part of the draft against the source — text through evidence quotes in the source language,
-numbers, contacts and technology names directly — and whatever fails is removed or cleared and
-turned into a question (`confirm` for a bullet, `multi` for a skill, `text` / `choice` for a
+Every **claim** about the person in the CV must rest on the source or on a **fact** (the user's
+answers). The server checks each claim — text through **evidence**, a verbatim quote from the
+source in its own language; numbers, contacts and technology names directly — and whatever fails
+is removed or cleared and turned into a question (`confirm` for a bullet, `multi` for a skill, `text` / `choice` for a
 field). `verification` stores the counts the UI shows ("12 bullets confirmed by quotes from your
 text, 2 sent to you to confirm, 1 skill moved to suggestions"). The rules per field:
 `backend/docs/architecture.md` §4.
