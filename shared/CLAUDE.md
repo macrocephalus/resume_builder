@@ -3,9 +3,9 @@
 The `@cv/shared` package: the contract between `frontend/` and `backend/` in code. The folder is
 `shared/`; the apps depend on `"@cv/shared": "workspace:*"` and import `from '@cv/shared'`. It
 holds the CV status machine (`docs/cv-statuses.md`), the draft schema `CvData` and the rule for
-what a draft is missing (`docs/architecture.md` §6.2). Still to come (planned files in
-`docs/architecture.md` §5): Zod schemas of `docs/api.md`, `computeMatch`, `CV_LANGUAGES`. No
-runtime dependencies except zod; pure code, no I/O.
+what a draft is missing, the question, answer and requirement schemas, the CV language list
+`CV_LANGUAGES`, `computeMatch`, and the request and response schemas of every endpoint in
+`docs/api.md` (`api.ts`). No runtime dependencies except zod; pure code, no I/O.
 
 ## Commands
 
