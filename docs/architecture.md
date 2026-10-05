@@ -121,7 +121,7 @@ schema language from the env file to the LLM output.
 
 | concern | choice | notes / rejected |
 |---|---|---|
-| Monorepo | pnpm workspace: `frontend/`, `backend/`, `shared/` | shared schemas & status machine imported by both — they cannot drift |
+| Monorepo | pnpm workspace: `frontend/`, `backend/`, `shared/` | the `@cv/shared` package (schemas & status machine) is imported by both — they cannot drift |
 | Language | TypeScript (strict) everywhere | |
 | Schemas | **Zod 4** | env config, request DTOs, `CvData`, LLM output, API response parsing on the client, forms |
 | Tests | **Vitest** in all packages, `supertest` for API e2e | one runner; backend via `unplugin-swc` for decorators. Jest rejected for consistency |
@@ -152,7 +152,7 @@ backend/Dockerfile         one image for api + worker (pnpm deploy --prod)
 backend/compose.yaml       api, worker, postgres, redis
 frontend/Dockerfile        Vite build → nginx (SPA + /api proxy)
 frontend/compose.yaml      web
-shared/src/                built with tsdown (ESM + CJS); no runtime deps except zod
+shared/src/                the @cv/shared package; tsdown (ESM + CJS); no runtime deps but zod
   cv-status.ts             CvStatus, CV_TRANSITIONS, isInProgress, hasDraft, stages
   cv-data.ts               CvData schema (eight blocks, sectionOrder) + limits
   cv-missing.ts            findMissing, isSectionEmpty, dropEmptyItems — pure

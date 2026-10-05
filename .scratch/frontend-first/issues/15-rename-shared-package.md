@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
 **Spec:** [../spec.md](../spec.md)
 
@@ -12,10 +12,10 @@
 confused with the frontend's own `src/shared` layer (`frontend/CLAUDE.md` → *Structure*). Decided
 in the frontend design grilling on 2026-10-05.
 
-- [ ] `shared/package.json` `name` is `@cv/shared`; the folder stays `shared/`
-- [ ] Every consumer depends on `"@cv/shared": "workspace:*"` and imports `from '@cv/shared'`; the lockfile is updated
-- [ ] Root `CLAUDE.md`, `shared/CLAUDE.md`, `frontend/CLAUDE.md`, `docs/architecture.md` and its `docs/uk/` copy call it "the `@cv/shared` package" wherever they mean the package
-- [ ] Root `typecheck`, `lint`, `build` and `test` pass for `shared` and `frontend`
+- [x] `shared/package.json` `name` is `@cv/shared`; the folder stays `shared/`
+- [x] Every consumer depends on `"@cv/shared": "workspace:*"` and imports `from '@cv/shared'`; the lockfile is updated
+- [x] Root `CLAUDE.md`, `shared/CLAUDE.md`, `frontend/CLAUDE.md`, `docs/architecture.md` and its `docs/uk/` copy call it "the `@cv/shared` package" wherever they mean the package
+- [x] Root `typecheck`, `lint`, `build` and `test` pass for `shared` and `frontend`
 
 **Notes:** Do it before the frontend first imports the package (ticket 03), while the rename is a
 one-line change.

@@ -1,10 +1,11 @@
 # Shared
 
-The contract between `frontend/` and `backend/` in code: the CV status machine
-(`docs/cv-statuses.md`), the draft schema `CvData` and the rule for what a draft is missing
-(`docs/architecture.md` §6.2). Still to come (planned files in `docs/architecture.md` §5): Zod
-schemas of `docs/api.md`, `computeMatch`, `CV_LANGUAGES`. No runtime dependencies except zod; pure
-code, no I/O.
+The `@cv/shared` package: the contract between `frontend/` and `backend/` in code. The folder is
+`shared/`; the apps depend on `"@cv/shared": "workspace:*"` and import `from '@cv/shared'`. It
+holds the CV status machine (`docs/cv-statuses.md`), the draft schema `CvData` and the rule for
+what a draft is missing (`docs/architecture.md` §6.2). Still to come (planned files in
+`docs/architecture.md` §5): Zod schemas of `docs/api.md`, `computeMatch`, `CV_LANGUAGES`. No
+runtime dependencies except zod; pure code, no I/O.
 
 ## Commands
 
@@ -14,7 +15,7 @@ code, no I/O.
 - `pnpm build` — tsdown → `dist/` (ESM for the frontend, CJS for the backend, with types)
 
 Dependencies are installed from the repo root (`pnpm install`): one workspace, one lockfile.
-The apps import the built package (`dist/`), so build `shared` before typechecking an app that
+The apps import the built package (`dist/`), so build `@cv/shared` before typechecking an app that
 uses it — `pnpm build` from the root does it in dependency order.
 
 ## Structure
@@ -32,7 +33,7 @@ not exported.
 
 ## Ownership
 
-`shared` belongs to the root integration layer, not to either app: it changes only through root
+The `@cv/shared` package belongs to the root integration layer, not to either app: it changes only through root
 specs and tickets (`.scratch/` at the repo root), together with the design doc it implements.
 After a change, typecheck both apps — a contract change must not leave either of them red.
 

@@ -39,8 +39,8 @@ glossary, ADRs and tracker, and runs on its own.
 - `frontend/` — React SPA; conventions and commands in `frontend/CLAUDE.md`. Git submodule.
 - `backend/` — NestJS + Drizzle + Vercel AI SDK v7 (Anthropic); `backend/CLAUDE.md`. Git submodule.
   Not scaffolded yet.
-- `shared/` — Zod schemas, CV status machine, `computeMatch`: the contract in code, imported by
-  both apps; `shared/CLAUDE.md`.
+- `shared/` — the `@cv/shared` package: Zod schemas, CV status machine, `computeMatch`; the
+  contract in code, imported by both apps; `shared/CLAUDE.md`.
 - `docs/` — task spec and the design set (draft, under review with the user):
   - `docs/architecture.md` — components, stack, data model, generation pipeline, match, frontend
   - `docs/api.md` — REST contract
@@ -51,8 +51,8 @@ glossary, ADRs and tracker, and runs on its own.
 
 ### Ownership
 
-- `frontend/` and `backend/` never import each other. They share code only through `shared`
-  (`workspace:*` dependency) and talk only over the HTTP API in `docs/api.md`.
+- `frontend/` and `backend/` never import each other. They share code only through the
+  `@cv/shared` package (`"@cv/shared": "workspace:*"`) and talk only over the HTTP API in `docs/api.md`.
 - **The contract belongs to the root:** `docs/api.md`, `docs/cv-statuses.md`, `shared/` and the
   domain glossary (`shared/GLOSSARY.md`) change only through root specs and tickets. A subproject
   reads the contract and adapts to it.

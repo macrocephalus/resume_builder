@@ -124,7 +124,7 @@ Zod — єдина мова схем від env-файлу до виводу LLM
 
 | задача | вибір | примітки / відхилене |
 |---|---|---|
-| Монорепозиторій | pnpm workspace: `frontend/`, `backend/`, `shared/` | спільні схеми та машину станів імпортують обидва застосунки — вони не можуть розійтися |
+| Монорепозиторій | pnpm workspace: `frontend/`, `backend/`, `shared/` | пакет `@cv/shared` (схеми та машину станів) імпортують обидва застосунки — вони не можуть розійтися |
 | Мова | TypeScript (strict) скрізь | |
 | Схеми | **Zod 4** | конфігурація env, DTO запитів, `CvData`, вивід LLM, парсинг відповідей API на клієнті, форми |
 | Тести | **Vitest** в усіх пакетах, `supertest` для e2e API | один раннер; на бекенді через `unplugin-swc` заради декораторів. Jest відхилено заради одноманітності |
@@ -155,7 +155,7 @@ backend/Dockerfile         один образ для api + worker (pnpm deploy 
 backend/compose.yaml       api, worker, postgres, redis
 frontend/Dockerfile        збірка Vite → nginx (SPA + проксі /api)
 frontend/compose.yaml      web
-shared/src/                збирається tsdown (ESM + CJS); жодних runtime-залежностей, крім zod
+shared/src/                пакет @cv/shared; tsdown (ESM + CJS); з runtime-залежностей лише zod
   cv-status.ts             CvStatus, CV_TRANSITIONS, isInProgress, hasDraft, stages
   cv-data.ts               схема CvData (вісім блоків, sectionOrder) + ліміти
   cv-missing.ts            findMissing, isSectionEmpty, dropEmptyItems — чисті функції
