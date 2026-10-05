@@ -84,7 +84,7 @@ desktop, and from any device later.
 - **web** — Vite build served by nginx; nginx also proxies `/api` to `api`, so the cookie is
   first-party and there is no CORS. In dev the Vite proxy does the same.
 - **api** — auth, CV CRUD, PDF ingest/export, questions, enqueuing. Runs migrations on start.
-  *The optional AnswerAgent (§6.5) is the only LLM call made inside a request.*
+  No LLM call is made inside a request.
 - **worker** — same codebase and Docker image, entry `worker.ts`
   (`NestFactory.createApplicationContext`), loads only the BullMQ processor and the agents.
 - **postgres** — the only source of truth: users, CVs, statuses, questions, attempts.
@@ -127,7 +127,7 @@ schema language from the env file to the LLM output.
 | **Backend** | NestJS 11 | |
 | DB | PostgreSQL 17 + **Drizzle ORM** (`node-postgres`), `drizzle-kit` migrations | explicit SQL fits CAS updates and queue-position queries. Prisma / TypeORM rejected (user's choice) |
 | Queue | BullMQ (`@nestjs/bullmq`) + Redis 7 | |
-| LLM | **Vercel AI SDK v7** (`ai`) + `@ai-sdk/anthropic` directly (no AI Gateway → only one secret) | model from env, default `claude-sonnet-5-5`; `claude-haiku-4-5` for AnswerAgent |
+| LLM | **Vercel AI SDK v7** (`ai`) + `@ai-sdk/anthropic` directly (no AI Gateway → only one secret) | model from env, default `claude-sonnet-5-5`|
 | Auth | `@nestjs/jwt`, `cookie-parser`, **argon2** | JWT in httpOnly cookie, no session table |
 | Rate limits | `@nestjs/throttler` (login, ingest) + counts in Postgres (generation, answers) | |
 | PDF in | **unpdf** | text layer only, no OCR |
@@ -275,14 +275,14 @@ Answer flow (`POST …/answer`, synchronous, in the API):
 2. `applyAnswer` (pure): scalar targets (contacts, `period`, `degree`, …) are written directly;
    `skills` targets append `"{label}: {value}"` (e.g. "English: B2"); `summary`/`bullets` targets
    append the answer as a sentence/bullet.
-3. *Optional* **AnswerAgent** for `summary`/`bullets` targets: rewrites only that section using the
-   answer, verified like §6.6 against source + facts; 15 s timeout ⇒ fall back to step 2's as-is
-   insert. First to cut (§12).
-4. One transaction: update `data`, append `{question, answer}` to `facts`, question → `answered`,
+3. One transaction: update `data`, append `{question, answer}` to `facts`, question → `answered`,
    `version + 1`; if no open question remains → `ready` (CAS). Returns the full CV.
 
 The frontend saves unsaved edits **before** sending an answer (prototype behaviour), so an answer
 never overwrites or is overwritten by local edits.
+
+An AnswerAgent that rewrites the summary or a bullet around the answer was designed and cut
+(§13 row 5): the answer goes into the CV as written. The README lists it under "with more time".
 
 ### 6.6 Keeping the AI from inventing facts
 
@@ -312,8 +312,7 @@ text, 2 sent to you to confirm, 1 skill moved to suggestions"). The rules per fi
 - **Doesn't:** the UI (English), error messages, the source (any language). Company and
   institution names keep their spelling from the source unless the source itself gives the name
   in the CV language.
-- Answers in another language are inserted as written; AnswerAgent, when enabled, also translates
-  them into the CV language.
+- Answers in another language are inserted as written.
 
 ## 7. Role targeting & match
 
@@ -465,11 +464,11 @@ Tests by importance: `backend/docs/architecture.md` §8 (verifier, isolation, st
 generation with a fake model…), `frontend/docs/architecture.md` §9, `shared` unit tests next to
 each module.
 
-If time runs short, cut in this order (reliability items above are never cut):
-1. AnswerAgent → as-is insertion only.
-2. Suggested roles / `fromCvId`.
-3. `GET /api/usage`, sessionStorage autosave.
-4. Match panel UI (requirements still generated and used for the `multi` question).
+Already cut: AnswerAgent (answers go in as written). If time runs short, cut next in this order
+(reliability items above are never cut):
+1. Suggested roles / `fromCvId`.
+2. `GET /api/usage`, sessionStorage autosave.
+3. Match panel UI (requirements still generated and used for the `multi` question).
 
 ## 13. Decisions
 
@@ -479,7 +478,7 @@ If time runs short, cut in this order (reliability items above are never cut):
 | 2 | Match computation | **confirmed:** deterministic keyword match in `shared/match.ts`, no model score |
 | 3 | `retrying` as its own status | **confirmed:** keep (user sees "attempt 2 of 3") |
 | 4 | PDF intake | **confirmed:** server extracts, user reviews text before generation (prototype UX + server-side handling of untrusted files) |
-| 5 | AnswerAgent | **confirmed:** design it, build it last; until then answers are inserted as written |
+| 5 | AnswerAgent | **cut by user:** answers are inserted as written; README lists it under "with more time" |
 | 6 | `shared/` as a workspace package | **confirmed by user:** yes — status machine, schemas and `computeMatch` must be identical on both sides; frontend and backend stay independent subprojects with their own Dockerfile and compose file (§3) |
 | 7 | UI language | **confirmed:** English (spec and reviewers are English-speaking) |
 | 7a | CV language | **confirmed by user:** chosen at creation, default English, sent to the server and the agent (§6.7); initial language list to confirm |

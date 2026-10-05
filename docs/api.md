@@ -283,7 +283,7 @@ Body depends on the question kind:
   `values` ⊆ `options`, ≥ 1 item unless `other` is given. Otherwise `400`.
   (`answerSchemaFor(question)` in `@cv/shared`.)
 - Synchronous (applied as described in [architecture.md §6.5](architecture.md#65-questions--answers));
-  with AnswerAgent enabled the request can take up to ~15 s.
+  the answer goes into the CV as written.
 - `200 { "cv": Cv }` — field updated, question `answered`, `version + 1`, status may become `ready`.
 - `429 RATE_LIMITED` above 60 answers/hour.
 
