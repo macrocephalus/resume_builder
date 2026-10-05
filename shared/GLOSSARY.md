@@ -17,8 +17,20 @@ The user's own background text (typed, or extracted from their PDF) that a CV is
 _Avoid_: input, upload, original
 
 **Draft**:
-The structured content of a CV (contacts, summary, experience, education, skills) once generation has succeeded.
-_Avoid_: result, output, generated CV
+The structured content of a CV, made of blocks, once generation has succeeded.
+_Avoid_: result, output, generated CV, document
+
+**Block**:
+One of the eight parts of a draft: contacts, summary, experience, projects, education, certifications, skills, languages. Contacts always comes first; the user orders the other seven.
+_Avoid_: part, category, chapter
+
+**Required block**:
+A block a CV should not go without — contacts, summary, experience, skills; when it is empty the user is asked about it, but may still skip the question and download the CV.
+_Avoid_: mandatory field, obligatory section
+
+**Item**:
+One entry of a block that holds several: a position in experience, a project, a school, a certificate, a language.
+_Avoid_: entry, record, row
 
 **Question**:
 A request to the user for something the source leaves missing, vague or unconfirmed; it points at one part of the draft and is answered or skipped once.

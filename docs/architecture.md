@@ -22,10 +22,13 @@ desktop, and from any device later.
 
 ### Scope notes
 
-- **Role note vs. "tailoring to a job description" (out of scope in the spec).** We accept a
-  short free-text note (≤ 1 000 chars), not a pasted vacancy, and use it only to (a) focus the
-  summary/ordering and (b) derive a list of role requirements for the match view. The CV is
-  generated the same way without it. The README states this boundary explicitly.
+- **Role note vs. "tailoring to a job description" (out of scope in the spec).** We accept
+  optional free text about the role — a short note or a pasted vacancy — and use it only to
+  (a) focus the summary/ordering and (b) derive a list of role requirements for the match view.
+  It is never a source of facts about the person: nothing from it reaches the CV except through a
+  question the user answers. The CV is generated the same way without it. (The field is still
+  `roleNote`, ≤ 1 000 chars, in this doc set; the rename to `roleContext` and the 5 000 limit
+  land with the API schemas.) The README states this boundary explicitly.
 - **Match is a hint, not a verdict.** The model lists what the *role* needs; whether the *CV*
   covers it is computed by our code (keyword match), never a model-invented percentage.
 - One PDF template, no OAuth/password reset/email verification/payments/admin (spec).
@@ -151,7 +154,8 @@ frontend/Dockerfile        Vite build → nginx (SPA + /api proxy)
 frontend/compose.yaml      web
 shared/src/                built with tsdown (ESM + CJS); no runtime deps except zod
   cv-status.ts             CvStatus, CV_TRANSITIONS, isInProgress, hasDraft, stages
-  cv-data.ts               CvData schema + limits
+  cv-data.ts               CvData schema (eight blocks, sectionOrder) + limits
+  cv-missing.ts            findMissing, isSectionEmpty, dropEmptyItems — pure
   question.ts              Question / answer schemas
   requirements.ts          Requirement schema
   cv-language.ts           CV_LANGUAGES allow-list: names, section headings, auto-question texts
@@ -242,16 +246,46 @@ CvData = {
   summary: string | null,                                   // 2–4 sentences, role-targeted
   experience: { id, title, company, period: string | null;  // ≤10, most relevant first
                 bullets: string[] /* ≤12 × ≤400 */ }[],
-  education:  { id, institution, degree, period: string | null }[],   // ≤6
-  skills: string[],                                         // ≤40 × ≤60
+  projects:   { id, name, period, url: string | null; bullets: string[] }[],   // ≤6
+  education:  { id, institution, degree, period: string | null }[],            // ≤6
+  certifications: { id, name, issuer, year: string | null }[],                 // ≤10
+  skills: string[],                                         // ≤40 × ≤60, no languages
+  languages:  { id, name, level: string | null }[],         // ≤8
+  sectionOrder: MovableSection[],                           // the seven blocks below contacts
 }
 ```
 
-- Five fixed sections (spec). Languages/certificates → skills, projects → experience (README).
-- Items of `experience`/`education` have server-assigned ids, so questions and edits survive
-  reordering. Bullets and skills are plain strings — nothing targets a single bullet.
-- Empty = absent: `null`, `""`, `[]` are not rendered in the preview or the PDF.
-- Dates stay as source text ("2019 – present"); normalising would invent precision.
+- **Eight blocks**: the five the spec names plus Projects, Certifications and Languages. Courses,
+  awards, publications, volunteering and interests are not blocks.
+- **Every field may be empty** — the model must not invent it — so the schema requires nothing.
+  What a CV *should* have is a separate rule, `findMissing` in `shared/cv-missing.ts`:
+
+  | block | required | when empty |
+  |---|---|---|
+  | contacts: `fullName` and at least one of `email` / `phone` | yes | a question per missing field |
+  | summary | yes | a question |
+  | skills | yes | the `multi` question (§6.5) |
+  | experience | yes, "no experience" allowed | a skippable question |
+  | education, projects, certifications, languages | no | block absent, no question |
+
+  Inside an existing item, an empty `title` / `company` / `period` (experience) or `institution`
+  (education) is also missing. A missing block or field is marked in the editor and listed next to
+  the PDF button; it never blocks the download.
+- **Block order** is part of the draft: `sectionOrder` lists the seven movable blocks, each
+  exactly once (anything else is rejected). Contacts is always first. A new draft gets the fixed
+  default — summary, experience, projects, education, certifications, skills, languages — the model
+  does not choose it; the user reorders blocks in the editor.
+- Items have UUID ids, unique within the draft (assigned by the server for a generated draft, by
+  the client for items added in the editor), so questions and edits survive reordering. Bullets
+  and skills are plain strings — nothing targets a single bullet.
+- Empty = absent: `null`, `""`, `[]` are not rendered in the preview or the PDF, and a block with
+  nothing in it has no heading (`isSectionEmpty`). Items whose every field is empty are dropped on
+  save, together with blank bullets, skills and links (`dropEmptyItems`).
+- Length limits (`CV_LIMITS`): 200 chars for a short field (name, title, company, period, level…),
+  300 for a link, 2 000 for the summary, on top of the counts above.
+- Dates, years and language levels stay as source text ("2019 – present", "fluent"); normalising
+  would invent precision. For a language without a level the model is told to ask a `choice`
+  question (A1–C2, Native); it is not a required field, so no auto question backs it up.
 - The CV is written in the language chosen at creation (§6.7), whatever the source language.
 
 ### 6.3 Intake
@@ -284,7 +318,7 @@ DraftSubmission = {
   requirements: { label; kind: 'skill' | 'experience'; keywords: string[] }[],             // ≤ 12
   suggestedRoles: string[],                        // ≤ 3
 }
-QuestionTarget = { section: 'contacts' | 'summary' | 'experience' | 'education' | 'skills';
+QuestionTarget = { section: CvSection /* any of the eight blocks */;
                    itemIndex?: number; field?: string }   // backend maps index → item id
 ```
 
@@ -319,8 +353,9 @@ Question kinds (as in the prototype):
 
 - `choice` only where the answer set is generic (English level, employment type, team size),
   never model-guessed facts ("3 / 5 / 7 years").
-- **Auto questions** (deterministic, `buildAutoQuestions`) for empty `fullName`, `email`, `phone`,
-  experience `period`, `summary` — unless the model already asked about that field.
+- **Auto questions** (deterministic, `buildAutoQuestions`) for everything `findMissing` reports
+  (§6.2): required blocks and required fields of existing items — unless the model already asked
+  about that field. The experience question can be skipped ("no experience").
 - **One `multi` question** "Which of these have you worked with? Only what you tick goes into the
   CV" — options = skills the model wrote but the source doesn't confirm ∪ `skill` requirements not
   covered by the CV (§7), max 8. Options are built by our code, not by the model.
@@ -354,9 +389,10 @@ technology names) is checked directly:
 
 | field | rule | if it fails after the loop |
 |---|---|---|
-| experience bullet | `evidence` quote (≥ 8 chars) found in source/facts; every number in the bullet appears in that quote | removed → `confirm` question with the claim |
-| title, company, institution, degree | substring of source/facts, **or** an `evidence` quote found in source/facts (translated text) | cleared → `text` question |
-| period | every number in it appears in source/facts | cleared → `text` question |
+| experience / project bullet | `evidence` quote (≥ 8 chars) found in source/facts; every number in the bullet appears in that quote | removed → `confirm` question with the claim |
+| title, company, institution, degree, project name, certification name and issuer, language name | substring of source/facts, **or** an `evidence` quote found in source/facts (translated text) | cleared → `text` question |
+| period, certification year | every number in it appears in source/facts | cleared → `text` question |
+| language level | appears in source/facts | cleared → `choice` question |
 | email, phone, links | verbatim (phone compared by digits) | cleared → auto question |
 | skills | appears in source/facts (tech names are language-neutral), or has an `evidence` quote | moved to the `multi` question |
 | summary | every number and every skill-like token is already in verified data | cleared → auto question |
@@ -451,7 +487,8 @@ used — there is nothing to check them against.
 Layout from the prototype: name 20 bold; contacts line joined with " · "; section headings
 9 pt bold uppercase with a rule, text taken from `CV_LANGUAGES[cv.language]` ("Experience" /
 "Досвід"); job heading "Title, Company" + muted period; bullets "•" indented
-14 pt; skills as one comma-joined paragraph. Empty fields/sections are skipped; pdfkit paginates.
+14 pt; skills as one comma-joined paragraph. Contacts first, then the blocks in `data.sectionOrder`.
+Empty fields/blocks are skipped; pdfkit paginates.
 One template behind `type CvTemplate = (cv, doc) => void`. Filename = sanitised title.
 
 The in-app preview is an HTML "sheet" (A4 aspect ratio, same fonts and sizes in container-query
@@ -502,8 +539,8 @@ resumes polling.
     bar, "You can close this page". `aria-live="polite"`.
   - *failed:* error text, Retry, Delete.
   - *has draft:* header (title, role, match bar, suggested roles, Download PDF); **editor**
-    (contacts, summary, experience with up/down/remove/add, education, skills as chips; bullets
-    as one textarea, one per line); side panel tabs **Questions · N** / **Match** / **Preview**;
+    (all eight blocks; items with up/down/remove/add; blocks below contacts with up/down; skills
+    as chips; bullets as one textarea, one per line; missing required blocks marked); side panel tabs **Questions · N** / **Match** / **Preview**;
     sticky **save bar** when dirty (Cancel / Save); verification report notice; conflict notice.
 
 ### Layout
@@ -554,16 +591,17 @@ If time runs short, cut in this order (reliability items above are never cut):
 3. `GET /api/usage`, dark mode, sessionStorage autosave.
 4. Match panel UI (requirements still generated and used for the `multi` question).
 
-## 13. Decisions to confirm
+## 13. Decisions
 
-| # | question | proposal |
+| # | question | decision |
 |---|---|---|
-| 1 | Role note vs "no JD tailoring" in the spec | short note ≤ 1 000 chars, framed as role context; README explains |
-| 2 | Match computation | deterministic keyword match in `shared/match.ts`, no model score |
-| 3 | `retrying` as its own status | keep (user sees "attempt 2 of 3") |
-| 4 | PDF intake | server extracts, user reviews text before generation (prototype UX + server-side handling of untrusted files) |
-| 5 | AnswerAgent | design it, build it last |
+| 1 | Role note vs "no JD tailoring" in the spec | **confirmed:** the role title is the main, required input; the description is optional free text — a short note or a pasted vacancy — used as role context and never as a source of facts; README explains |
+| 2 | Match computation | **confirmed:** deterministic keyword match in `shared/match.ts`, no model score |
+| 3 | `retrying` as its own status | **confirmed:** keep (user sees "attempt 2 of 3") |
+| 4 | PDF intake | **confirmed:** server extracts, user reviews text before generation (prototype UX + server-side handling of untrusted files) |
+| 5 | AnswerAgent | **confirmed:** design it, build it last; until then answers are inserted as written |
 | 6 | `shared/` as a workspace package | **confirmed by user:** yes — status machine, schemas and `computeMatch` must be identical on both sides; frontend and backend stay independent subprojects with their own Dockerfile and compose file (§3) |
-| 7 | UI language | English (spec and reviewers are English-speaking) |
+| 7 | UI language | **confirmed:** English (spec and reviewers are English-speaking) |
 | 7a | CV language | **confirmed by user:** chosen at creation, default English, sent to the server and the agent (§6.7); initial language list to confirm |
-| 8 | Explicit Save vs autosave | explicit Save + sticky save bar (prototype), save-before-answer |
+| 8 | Explicit Save vs autosave | **confirmed:** explicit Save + sticky save bar (prototype), save-before-answer |
+| 9 | CV blocks | **confirmed by user:** eight blocks, required vs optional, user-changeable block order (§6.2) |

@@ -20,7 +20,7 @@ stateDiagram-v2
     retrying --> generating: after backoff
     generating --> failed: non-retryable failure or attempts exhausted
     failed --> queued: user presses Retry
-    needs_input --> ready: last open question answered / skipped
+    needs_input --> ready: last open question answered / skipped / removed with its item
     ready --> [*]
 ```
 
@@ -121,7 +121,8 @@ export type GenerationStage = (typeof GENERATION_STAGES)[number];
 ### `needs_input` — "Needs your answers"
 - **Backend:** draft saved, open questions exist. Each answer/skip updates its field
   (see [architecture.md §6.5](architecture.md#65-questions--answers)); when the last open question
-  is closed, the same transaction sets `ready`.
+  is closed, the same transaction sets `ready`. A manual save that removes an item skips the
+  questions about it, which can close the last one too.
 - **Frontend:** warning badge with the open-question count; editor, questions panel, match panel,
   preview, Download PDF. No polling.
 - **User can:** answer, pick an option, skip, edit any field, download PDF, create a CV for a
@@ -148,8 +149,8 @@ The API enforces this table; anything else returns `409 INVALID_STATE`. Delete i
 
 ## 4. How a status changes
 
-- **One writer.** Only `CvStatusService` changes `cvs.status`. Both the worker and the answer
-  endpoint call it; it checks `canTransition` before writing.
+- **One writer.** Only `CvStatusService` changes `cvs.status`. The worker, the answer endpoint
+  and the manual save call it; it checks `canTransition` before writing.
 - **Compare-and-set.** Every transition is
   `UPDATE cvs SET status = :to, … WHERE id = :id AND status = ANY(:allowedFrom)`.
   0 rows updated ⇒ someone else moved or deleted the CV ⇒ the caller drops its result. This makes
