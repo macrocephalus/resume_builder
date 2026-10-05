@@ -20,6 +20,9 @@ stops and gets a root ticket that blocks it.
 - Root tickets carry a `Package:` line near the top: `shared`, `backend`, `frontend`, or several, comma-separated
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Blocking edges are a `Blocked by:` line near the top; a root ticket may be blocked by a subproject ticket and vice versa, written as a path from the repo root
+- A subproject ticket that implements part of a root ticket carries an `Implements:` line with the root ticket's path from the repo root; its spec names the root spec on a `Sources:` line. The subproject owns the *how*, the root ticket keeps the *what* and its acceptance from the user's view
+- When subproject tickets take over a root ticket, the root ticket gets `Status: moved` and a `Moved to:` line listing their paths, so no work has two live tickets
+- A finished ticket gets `Status: done` once its branch is merged into `main`
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
 ## When a skill says "publish to the issue tracker"
