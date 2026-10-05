@@ -11,6 +11,15 @@ importers:
 
   frontend:
     dependencies:
+      '@fontsource/golos-text':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/jetbrains-mono':
+        specifier: ^5.3.0
+        version: 5.3.0
+      '@fontsource/unbounded':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@hookform/resolvers':
         specifier: ^5.9.1
         version: 5.9.1(react-hook-form@7.89.0(@types/react@19.3.0)(react@19.3.0))(zod@4.6.5)
@@ -69,6 +78,9 @@ importers:
       oxlint:
         specifier: ^1.81.0
         version: 1.86.0
+      playwright:
+        specifier: ^1.63.0
+        version: 1.63.0
       prettier:
         specifier: ^3.9.9
         version: 3.9.9
@@ -245,6 +257,15 @@ packages:
     peerDependenciesMeta:
       '@noble/hashes':
         optional: true
+
+  '@fontsource/golos-text@5.3.0':
+    resolution: {integrity: sha512-R+gM4qOZSrge4TtEGps0zTpU8X4e7e32L+3yy0J/2LnVB/IERlidEpXPWSZVGzTaL5QnPRVmoebRXSuVtjUIVg==}
+
+  '@fontsource/jetbrains-mono@5.3.0':
+    resolution: {integrity: sha512-fqDfB5I9f1p1TV486aUgB9t8zP84P0O1FtQR5Ol9vjwPy+S+EIGlVYm1cvj2W5shcZMTg2nZFdVMoH5wFu8a1A==}
+
+  '@fontsource/unbounded@5.3.0':
+    resolution: {integrity: sha512-pPD6hsTnjoQRr6pCsqMHbHBfauB4LZygCNQEUJHu+CO2wzDFHqELEFSG7sTwo5Z5Gr4q3OK0fIILOXBJDv6lcw==}
 
   '@hookform/resolvers@5.9.1':
     resolution: {integrity: sha512-7b7vsbraJxKgjVSA1Nur9tLwj539WGJUBLA7QNvXnFoT2pM5Z7G+6rlukk4B2/QrTZy6huRtH6wKeESPKuIr6w==}
@@ -1354,6 +1375,16 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
+  playwright-core@1.63.0:
+    resolution: {integrity: sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
+  playwright@1.63.0:
+    resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
+    engines: {node: '>=20'}
+    hasBin: true
+
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
     engines: {node: ^10 || ^12 || >=14}
@@ -1888,6 +1919,12 @@ snapshots:
   '@csstools/css-tokenizer@4.0.2': {}
 
   '@exodus/bytes@1.16.0': {}
+
+  '@fontsource/golos-text@5.3.0': {}
+
+  '@fontsource/jetbrains-mono@5.3.0': {}
+
+  '@fontsource/unbounded@5.3.0': {}
 
   '@hookform/resolvers@5.9.1(react-hook-form@7.89.0(@types/react@19.3.0)(react@19.3.0))(zod@4.6.5)':
     dependencies:
@@ -2581,6 +2618,12 @@ snapshots:
   picocolors@1.1.1: {}
 
   picomatch@4.0.7: {}
+
+  playwright-core@1.63.0: {}
+
+  playwright@1.63.0:
+    dependencies:
+      playwright-core: 1.63.0
 
   postcss@8.5.28:
     dependencies:
