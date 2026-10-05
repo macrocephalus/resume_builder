@@ -186,7 +186,8 @@ same schemas.
 67. As a user, I want to see how many generations I have left this hour, so that the limit is not
     a surprise.
 68. As a user, I want my unsent New CV form to survive a reload, so that I do not retype it.
-69. As a user, I want a dark theme that follows my device, so that the app is comfortable at night.
+69. ~~As a user, I want a dark theme that follows my device, so that the app is comfortable at night.~~
+    Dropped 2026-10-05: light theme only (`frontend/docs/design.md`).
 
 ### Developer
 
@@ -345,7 +346,7 @@ user review, AnswerAgent designed but built last, English UI, explicit Save with
 
 - **First pass:** user stories 1–63 and 70–75.
 - **Second layer, separate tickets:** stories 64–69 (Match panel, suggested roles, usage, form
-  autosave, dark theme). `computeMatch` and the requirements schema are still built in `shared`
+  autosave; dark theme dropped). `computeMatch` and the requirements schema are still built in `shared`
   in the first pass, because the list item and the backend need them.
 
 ## Testing Decisions

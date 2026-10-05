@@ -2,7 +2,7 @@
 
 **Package:** frontend
 
-**Blocked by:** 02
+**Blocked by:** 02, 15
 
 **Status:** ready-for-agent
 
@@ -23,4 +23,4 @@ provider, the API client, design tokens and UI primitives, and the test setup at
 - [ ] Tests run through the real router, providers and API client against the mock handlers: sign up, login failure, redirect with return address, `401` handling
 - [ ] `pnpm typecheck && pnpm lint && pnpm build` and the tests pass
 
-**Notes:** Visual decisions: follow `frontend/docs/design.md` if it exists by the time this ticket starts, otherwise `docs/architecture.md` §11 and the prototype.
+**Notes:** Visual decisions: follow `frontend/docs/design.md` (exists since 2026-10-05: tokens, `glass` utility, backdrop, primitive catalogue) and `frontend/CLAUDE.md` → *Structure* / *Styling* (layers `app → features → entities → shared`, `@/` alias, oxlint import boundaries). Tooling for Prettier + tailwind plugin and `pnpm screenshots` is not in this ticket's checklist yet — add it at `/to-tickets` or as a separate frontend ticket.
