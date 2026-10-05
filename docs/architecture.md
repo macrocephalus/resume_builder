@@ -30,9 +30,8 @@ desktop, and from any device later.
   optional free text about the role — a short note or a pasted vacancy — and use it only to
   (a) focus the summary/ordering and (b) derive a list of role requirements for the match view.
   It is never a source of facts about the person: nothing from it reaches the CV except through a
-  question the user answers. The CV is generated the same way without it. (The field is still
-  `roleNote`, ≤ 1 000 chars, in this doc set; the rename to `roleContext` and the 5 000 limit
-  land with the API schemas.) The README states this boundary explicitly.
+  question the user answers. The CV is generated the same way without it. The field is
+  `roleContext`, ≤ 5 000 chars. The README states this boundary explicitly.
 - **Match is a hint, not a verdict.** The model lists what the *role* needs; whether the *CV*
   covers it is computed by our code (keyword match), never a model-invented percentage.
 - One PDF template, no OAuth/password reset/email verification/payments/admin (spec).
@@ -316,7 +315,7 @@ text, 2 sent to you to confirm, 1 skill moved to suggestions"). The rules per fi
 
 ## 7. Role targeting & match
 
-- **Inputs:** `target_role` (required), `role_note` (optional). Both are immutable per CV — the
+- **Inputs:** `targetRole` (required), `roleContext` (optional). Both are immutable per CV — the
   summary and ordering were generated for them. Another role = another CV.
 - **Requirements** come from DraftAgent in the same call: up to 12 `{label, kind, keywords}`
   ("PostgreSQL" · skill · ["postgres", "postgresql"]; "Team leadership" · experience · ["led",
