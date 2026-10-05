@@ -4,7 +4,9 @@
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/07-draft-editor.md`
 
 **Spec:** [../spec.md](../spec.md)
 

@@ -4,7 +4,9 @@
 
 **Blocked by:** 02, 15
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/01-tooling-and-layer-boundaries.md`, `frontend/.scratch/spa/issues/02-design-foundation.md`, `frontend/.scratch/spa/issues/03-sign-up-and-log-in.md`
 
 **Spec:** [../spec.md](../spec.md)
 

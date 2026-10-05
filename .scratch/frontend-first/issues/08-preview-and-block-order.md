@@ -4,7 +4,9 @@
 
 **Blocked by:** 07
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/08-preview-and-block-order.md`
 
 **Spec:** [../spec.md](../spec.md)
 

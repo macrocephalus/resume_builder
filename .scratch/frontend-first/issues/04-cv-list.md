@@ -4,7 +4,9 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/04-my-cvs-list.md`
 
 **Spec:** [../spec.md](../spec.md)
 

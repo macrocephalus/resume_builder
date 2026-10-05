@@ -4,7 +4,9 @@
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/06-pdf-upload.md`
 
 **Spec:** [../spec.md](../spec.md)
 

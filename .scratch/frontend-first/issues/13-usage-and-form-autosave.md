@@ -4,7 +4,9 @@
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/13-usage-and-form-autosave.md`
 
 **Spec:** [../spec.md](../spec.md)
 

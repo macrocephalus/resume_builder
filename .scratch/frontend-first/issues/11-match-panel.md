@@ -4,7 +4,9 @@
 
 **Blocked by:** 08
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/11-match-panel.md`
 
 **Spec:** [../spec.md](../spec.md)
 

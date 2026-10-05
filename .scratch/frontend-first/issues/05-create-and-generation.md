@@ -4,7 +4,9 @@
 
 **Blocked by:** 04
 
-**Status:** ready-for-agent
+**Status:** moved
+
+**Moved to:** `frontend/.scratch/spa/issues/05-create-from-text-and-generation.md`
 
 **Spec:** [../spec.md](../spec.md)
 
