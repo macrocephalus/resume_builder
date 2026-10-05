@@ -42,7 +42,10 @@ glossary, ADRs and tracker, and runs on its own.
 - `shared/` — the `@cv/shared` package: Zod schemas, CV status machine, `computeMatch`; the
   contract in code, imported by both apps; `shared/CLAUDE.md`.
 - `docs/` — task spec and the design set (draft, under review with the user):
-  - `docs/architecture.md` — components, stack, data model, generation pipeline, match, frontend
+  - `docs/architecture.md` — product, flow, components, stack, the draft, questions, CV language,
+    match, decisions; the inside of each subproject is in `backend/docs/architecture.md` and
+    `frontend/docs/architecture.md`
+  - `docs/adr/` — decisions that span the subprojects
   - `docs/api.md` — REST contract
   - `docs/cv-statuses.md` — CV state machine, allowed actions per status
 - `workflow.md` (root, in Ukrainian) — **how to work**: which folder to open the session in, the
