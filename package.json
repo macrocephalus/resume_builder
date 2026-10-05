@@ -1,0 +1,17 @@
+{
+  "name": "resume-builder",
+  "private": true,
+  "packageManager": "pnpm@11.20.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "pull": "git pull --ff-only && git submodule update --init && git submodule foreach 'git switch main && git pull --ff-only'",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "build": "pnpm -r build",
+    "stack": "docker compose up --build",
+    "stack:backend": "docker compose -f backend/compose.yaml --env-file .env up --build",
+    "stack:frontend": "docker compose -f frontend/compose.yaml up --build"
+  }
+}

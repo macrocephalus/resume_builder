@@ -1,0 +1,7 @@
+packages:
+  - frontend
+  - backend
+  - shared
+
+# `pnpm deploy` (backend Docker image) copies workspace deps like `shared` as real files
+injectWorkspacePackages: true

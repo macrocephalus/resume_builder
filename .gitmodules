@@ -1,0 +1,8 @@
+[submodule "backend"]
+	path = backend
+	url = git@github.com:macrocephalus/resume_builder_backend.git
+	branch = main
+[submodule "frontend"]
+	path = frontend
+	url = git@github.com:macrocephalus/resume_builder_frontend.git
+	branch = main

@@ -1,0 +1,8 @@
+# The whole stack: `docker compose up` from the repo root.
+# Each subproject owns its compose file and also runs on its own (see CLAUDE.md, "Docker").
+include:
+  # reads the root .env (ANTHROPIC_API_KEY)
+  - backend/compose.yaml
+  # the web container proxies /api to the api service instead of the host
+  - path: frontend/compose.yaml
+    env_file: compose.stack.env

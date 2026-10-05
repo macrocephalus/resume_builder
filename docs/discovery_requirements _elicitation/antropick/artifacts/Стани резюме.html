@@ -1,0 +1,282 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Стани резюме</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Unbounded:wght@500;600&display=swap">
+<style>
+/* Layout: одна колонка до 1000px; схема переходів на всю ширину, під нею по одному блоку на кожен стан із трьома колонками, які на телефоні стають стовпчиком */
+:root{
+  --bg:#F4F6FA; --surface:#FFFFFF; --ink:#131926; --muted:#586174;
+  --line:#D6DCE8; --line-strong:#AEB8CB;
+  --accent:#1F4FD1; --accent-soft:#E6ECFB;
+  --wait:#955800; --wait-soft:#FBF0DC;
+  --ok:#1B7A4B; --ok-soft:#E2F3EA;
+  --bad:#B4372B; --bad-soft:#FBE7E4;
+  --font-display:'Unbounded','Golos Text',system-ui,sans-serif;
+  --font-body:'Golos Text',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F131B; --surface:#171C27; --ink:#E7EBF3; --muted:#9AA4B8;
+    --line:#2A3142; --line-strong:#465069;
+    --accent:#86A6FF; --accent-soft:#1B2540;
+    --wait:#E3AA52; --wait-soft:#2E2413;
+    --ok:#62C792; --ok-soft:#14291F;
+    --bad:#F08A80; --bad-soft:#331A18;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F131B; --surface:#171C27; --ink:#E7EBF3; --muted:#9AA4B8;
+  --line:#2A3142; --line-strong:#465069;
+  --accent:#86A6FF; --accent-soft:#1B2540;
+  --wait:#E3AA52; --wait-soft:#2E2413;
+  --ok:#62C792; --ok-soft:#14291F;
+  --bad:#F08A80; --bad-soft:#331A18;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.5}
+h1,h2,h3,p,ul,figure,pre{margin:0;padding:0}
+ul{list-style:none}
+.page{max-width:1000px;margin-inline:auto;padding-inline:18px;padding-block:36px 72px;display:flex;flex-direction:column;gap:44px}
+.eyebrow{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--font-display);font-weight:600;font-size:clamp(26px,5vw,38px);line-height:1.12;text-wrap:balance}
+h2{font-family:var(--font-display);font-weight:500;font-size:18px;line-height:1.3;text-wrap:balance}
+.lead{max-width:66ch;color:var(--muted);font-size:17px}
+.head{display:flex;flex-direction:column;gap:12px}
+section{display:flex;flex-direction:column;gap:16px}
+.note{max-width:66ch;color:var(--muted);font-size:15px}
+code{font-family:var(--font-mono);font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius:3px}
+
+/* бейджі станів: одна палітра для схеми і для списку */
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:13px;font-weight:500;border:1.5px solid;border-radius:999px;padding:2px 11px;white-space:nowrap;color:var(--ink)}
+.pill.queued{border-color:var(--line-strong);background:var(--surface)}
+.pill.generating{border-color:var(--accent);background:var(--accent-soft)}
+.pill.retrying,.pill.needs_input{border-color:var(--wait);background:var(--wait-soft)}
+.pill.failed{border-color:var(--bad);background:var(--bad-soft)}
+.pill.ready{border-color:var(--ok);background:var(--ok-soft)}
+
+/* схема */
+figure{display:flex;flex-direction:column;gap:10px}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.scroll svg{display:block;width:100%;height:auto;min-width:780px}
+figcaption{max-width:66ch;font-size:14px;color:var(--muted)}
+.n{stroke-width:1.5}
+.n-queued{fill:var(--surface);stroke:var(--line-strong)}
+.n-generating{fill:var(--accent-soft);stroke:var(--accent)}
+.n-wait{fill:var(--wait-soft);stroke:var(--wait)}
+.n-failed{fill:var(--bad-soft);stroke:var(--bad)}
+.n-ready{fill:var(--ok-soft);stroke:var(--ok)}
+.n-text{fill:var(--ink);font-family:var(--font-mono);font-size:13.5px;font-weight:500}
+.d-line{fill:none;stroke:var(--ink);stroke-width:1.5}
+.d-head{fill:var(--ink)}
+.d-label{fill:var(--muted);font-family:var(--font-mono);font-size:11.5px}
+
+/* стани */
+.states{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.state{padding:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.state:first-child{border-top:0}
+.state-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.state-head h3{font-size:16px;font-weight:600}
+.next{font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-left:auto}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 20px}
+.col{display:flex;flex-direction:column;gap:4px;min-width:0;font-size:14.5px}
+.col p{color:var(--muted)}
+
+.groups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.group{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.group .pills{display:flex;flex-wrap:wrap;gap:6px}
+.group p{font-size:14.5px;color:var(--muted)}
+
+.plain li{padding-block:9px;border-top:1px solid var(--line);font-size:15px;max-width:66ch}
+.plain li:last-child{border-bottom:1px solid var(--line)}
+.plain li span{color:var(--muted)}
+pre{font-family:var(--font-mono);font-size:12.5px;line-height:1.6;padding:14px 16px;border:1px solid var(--line);border-radius:6px;background:var(--surface);overflow-x:auto}
+
+@media (max-width:720px){
+  .page{gap:36px;padding-block:24px 56px}
+  .cols,.groups{grid-template-columns:minmax(0,1fr)}
+  .next{margin-left:0;flex-basis:100%}
+}
+</style>
+
+<div class="page">
+
+  <header class="head">
+    <div class="eyebrow">AI CV Builder · тестове завдання</div>
+    <h1>Стани резюме</h1>
+    <p class="lead">Шість станів від моменту, коли користувач натиснув «Згенерувати», до готового резюме. Один і той самий список для бекенду й фронтенду: бекенд зберігає стан і віддає його в API рядком, фронтенд лише показує.</p>
+  </header>
+
+  <section>
+    <h2>Як стани змінюють один одного</h2>
+    <figure>
+      <div class="scroll">
+        <svg viewBox="0 0 910 335" role="img" aria-label="Резюме проходить стани queued, generating, а далі needs_input або ready. Після збою воно потрапляє в retrying і повертається в generating. Коли спроби вичерпано, стан failed, звідки користувач повертає його в queued кнопкою Повторити. З needs_input резюме переходить у ready, коли всі питання закрито.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path class="d-head" d="M0 0L10 5L0 10z"/>
+            </marker>
+          </defs>
+
+          <rect class="n n-queued" x="20" y="110" width="150" height="46" rx="23"/>
+          <text class="n-text" x="95" y="138" text-anchor="middle">queued</text>
+          <rect class="n n-generating" x="280" y="110" width="150" height="46" rx="23"/>
+          <text class="n-text" x="355" y="138" text-anchor="middle">generating</text>
+          <rect class="n n-wait" x="530" y="30" width="170" height="46" rx="23"/>
+          <text class="n-text" x="615" y="58" text-anchor="middle">needs_input</text>
+          <rect class="n n-ready" x="740" y="110" width="150" height="46" rx="23"/>
+          <text class="n-text" x="815" y="138" text-anchor="middle">ready</text>
+          <rect class="n n-wait" x="280" y="220" width="150" height="46" rx="23"/>
+          <text class="n-text" x="355" y="248" text-anchor="middle">retrying</text>
+          <rect class="n n-failed" x="530" y="220" width="170" height="46" rx="23"/>
+          <text class="n-text" x="615" y="248" text-anchor="middle">failed</text>
+
+          <line class="d-line" x1="170" y1="133" x2="280" y2="133" marker-end="url(#ah)"/>
+          <text class="d-label" x="225" y="123" text-anchor="middle">воркер узяв</text>
+
+          <line class="d-line" x1="430" y1="133" x2="740" y2="133" marker-end="url(#ah)"/>
+          <text class="d-label" x="610" y="151" text-anchor="middle">питань немає</text>
+
+          <path class="d-line" d="M430 121 C485 121 475 53 530 53" marker-end="url(#ah)"/>
+          <text class="d-label" x="460" y="84" text-anchor="end">є відкриті питання</text>
+
+          <path class="d-line" d="M700 53 C770 53 815 65 815 110" marker-end="url(#ah)"/>
+          <text class="d-label" x="724" y="34">усі питання закрито</text>
+
+          <line class="d-line" x1="330" y1="156" x2="330" y2="220" marker-end="url(#ah)"/>
+          <text class="d-label" x="320" y="192" text-anchor="end">збій</text>
+          <line class="d-line" x1="380" y1="220" x2="380" y2="156" marker-end="url(#ah)"/>
+          <text class="d-label" x="390" y="192">після паузи</text>
+
+          <path class="d-line" d="M430 145 C490 145 480 243 530 243" marker-end="url(#ah)"/>
+          <text class="d-label" x="508" y="208">спроби вичерпано</text>
+
+          <path class="d-line" d="M615 266 C540 330 150 330 95 156" marker-end="url(#ah)"/>
+          <text class="d-label" x="355" y="324" text-anchor="middle">кнопка «Повторити»</text>
+        </svg>
+      </div>
+      <figcaption>Назад резюме рухається лише двома шляхами: автоматичний повтор після збою і ручний повтор після помилки. Ручні правки тексту стан не змінюють.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Що відбувається в кожному стані</h2>
+    <div class="states">
+
+      <div class="state">
+        <div class="state-head"><span class="pill queued">queued</span><h3>У черзі</h3><span class="next">далі: generating</span></div>
+        <div class="cols">
+          <div class="col"><div class="eyebrow">Бекенд</div><p>Вихідний текст і задачу збережено в базі, id лежить у черзі. Рахує, скільки задач попереду.</p></div>
+          <div class="col"><div class="eyebrow">Фронтенд</div><p>Бейдж і рядок «перед вами N». Опитує статуси кожні 3 секунди.</p></div>
+          <div class="col"><div class="eyebrow">Дії користувача</div><p>Видалити резюме. Можна закрити сторінку, задача не зникне.</p></div>
+        </div>
+      </div>
+
+      <div class="state">
+        <div class="state-head"><span class="pill generating">generating</span><h3>Генерується</h3><span class="next">далі: needs_input, ready, retrying, failed</span></div>
+        <div class="cols">
+          <div class="col"><div class="eyebrow">Бекенд</div><p>Воркер збирає промпт, викликає Claude, перевіряє відповідь схемою і звіряє факти з вихідним текстом. Чернетку, питання і новий стан пише однією транзакцією.</p></div>
+          <div class="col"><div class="eyebrow">Фронтенд</div><p>Індикатор роботи й назва етапу. Опитування триває. Редактора ще немає.</p></div>
+          <div class="col"><div class="eyebrow">Дії користувача</div><p>Видалити резюме.</p></div>
+        </div>
+      </div>
+
+      <div class="state">
+        <div class="state-head"><span class="pill retrying">retrying</span><h3>Повтор після збою</h3><span class="next">далі: generating</span></div>
+        <div class="cols">
+          <div class="col"><div class="eyebrow">Бекенд</div><p>Спроба не вдалася: мережа, таймаут або невалідна відповідь моделі. Задача чекає паузу й повертається у воркер, лічильник спроб зростає.</p></div>
+          <div class="col"><div class="eyebrow">Фронтенд</div><p>Рядок «Збій, спроба 2 з 3». Опитування триває.</p></div>
+          <div class="col"><div class="eyebrow">Дії користувача</div><p>Видалити резюме. Більше нічого робити не треба.</p></div>
+        </div>
+      </div>
+
+      <div class="state">
+        <div class="state-head"><span class="pill failed">failed</span><h3>Помилка</h3><span class="next">далі: queued</span></div>
+        <div class="cols">
+          <div class="col"><div class="eyebrow">Бекенд</div><p>Усі три спроби вичерпано. Зберігає зрозумілий текст помилки. Вихідний текст лишається, тож повтор не вимагає завантажувати файл знову.</p></div>
+          <div class="col"><div class="eyebrow">Фронтенд</div><p>Текст помилки і кнопка «Повторити». Опитування зупинено.</p></div>
+          <div class="col"><div class="eyebrow">Дії користувача</div><p>Повторити генерацію або видалити резюме.</p></div>
+        </div>
+      </div>
+
+      <div class="state">
+        <div class="state-head"><span class="pill needs_input">needs_input</span><h3>Потрібні відповіді</h3><span class="next">далі: ready</span></div>
+        <div class="cols">
+          <div class="col"><div class="eyebrow">Бекенд</div><p>Чернетка збережена, є відкриті питання. Кожна відповідь оновлює своє поле резюме. Коли відкритих питань не лишилося, ставить <code>ready</code>.</p></div>
+          <div class="col"><div class="eyebrow">Фронтенд</div><p>Редактор, список питань з лічильником, PDF. Опитування зупинено.</p></div>
+          <div class="col"><div class="eyebrow">Дії користувача</div><p>Відповісти, обрати варіант, пропустити питання, редагувати поля, завантажити PDF.</p></div>
+        </div>
+      </div>
+
+      <div class="state">
+        <div class="state-head"><span class="pill ready">ready</span><h3>Готове</h3><span class="next">кінцевий стан</span></div>
+        <div class="cols">
+          <div class="col"><div class="eyebrow">Бекенд</div><p>Чернетка збережена, відкритих питань немає: на всі відповіли або їх пропустили. PDF збирає з поточних даних під час кожного завантаження.</p></div>
+          <div class="col"><div class="eyebrow">Фронтенд</div><p>Редактор і PDF. Блоку питань немає.</p></div>
+          <div class="col"><div class="eyebrow">Дії користувача</div><p>Редагувати поля, завантажити PDF, видалити резюме.</p></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Три групи, за якими фронтенд вирішує, що показати</h2>
+    <div class="groups">
+      <div class="group">
+        <div class="eyebrow">Триває робота</div>
+        <div class="pills"><span class="pill queued">queued</span><span class="pill generating">generating</span><span class="pill retrying">retrying</span></div>
+        <p>Опитування увімкнено. Показуємо хід, редактора немає.</p>
+      </div>
+      <div class="group">
+        <div class="eyebrow">Потрібен користувач</div>
+        <div class="pills"><span class="pill failed">failed</span></div>
+        <p>Опитування вимкнено. Показуємо помилку і «Повторити».</p>
+      </div>
+      <div class="group">
+        <div class="eyebrow">Є чернетка</div>
+        <div class="pills"><span class="pill needs_input">needs_input</span><span class="pill ready">ready</span></div>
+        <p>Опитування вимкнено. Доступні редактор і PDF.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Спільний код для бекенду і фронтенду</h2>
+<pre>export const CV_STATUSES = [
+  'queued', 'generating', 'retrying', 'failed', 'needs_input', 'ready',
+] as const;
+export type CvStatus = (typeof CV_STATUSES)[number];
+
+// дозволені переходи: бекенд перевіряє їх перед кожною зміною стану
+export const CV_TRANSITIONS: Record&lt;CvStatus, CvStatus[]&gt; = {
+  queued:      ['generating'],
+  generating:  ['needs_input', 'ready', 'retrying', 'failed'],
+  retrying:    ['generating'],
+  failed:      ['queued'],
+  needs_input: ['ready'],
+  ready:       [],
+};
+
+export const isInProgress = (s: CvStatus) =&gt;
+  s === 'queued' || s === 'generating' || s === 'retrying';   // фронтенд опитує статуси
+export const hasDraft = (s: CvStatus) =&gt;
+  s === 'needs_input' || s === 'ready';                       // доступні редактор і PDF</pre>
+    <p class="note">Стан обчислює тільки бекенд. Фронтенд його не виводить із власних даних, а зіставляє рядок із підписом, кольором і набором кнопок. Так обидві сторони не розійдуться.</p>
+  </section>
+
+  <section>
+    <h2>Що станом не є</h2>
+    <ul class="plain">
+      <li>Форма до надсилання. <span>Запису в базі ще немає, незавершений ввід живе тільки в браузері.</span></li>
+      <li>Етапи всередині генерації. <span>Збирання промпту, відповідь моделі, перевірка і збереження йдуть окремим полем <code>stage</code> і потрібні лише для підпису на екрані.</span></li>
+      <li>Ручне редагування. <span>Зберігає нову версію даних, стан лишається тим самим.</span></li>
+      <li>Завантаження PDF. <span>Файл збирається на льоту з поточних даних і ніде не зберігається.</span></li>
+      <li>Видалення. <span>Запис просто зникає, стану «видалено» немає.</span></li>
+    </ul>
+  </section>
+
+</div>
+
+</body></html>
