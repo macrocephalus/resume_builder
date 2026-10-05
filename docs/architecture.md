@@ -139,8 +139,8 @@ schema language from the env file to the LLM output.
 | Routing | React Router 8, data mode (`createBrowserRouter`, route `lazy`) | |
 | Server state | **TanStack Query 5** | the only cache of server data; polling via `refetchInterval` |
 | Forms | **React Hook Form** + `@hookform/resolvers/zod` | same Zod schemas as the API |
-| Styling | **Tailwind CSS v4** with design tokens from the prototype (`@theme`) | light + dark via `prefers-color-scheme` |
-| UI primitives | own small set in `shared/ui` on native elements (no UI kit) | prototype needs ~12 primitives; a kit would cost more than it saves |
+| Styling | **Tailwind CSS v4** with design tokens from the prototype (`@theme`) | light theme only; frosted glass on floating controls over a pastel backdrop (`frontend/docs/design.md`) |
+| UI primitives | own small set in `src/shared/ui` on native elements (no UI kit) | prototype needs ~12 primitives; a kit would cost more than it saves; glass kits rejected in `frontend/docs/adr/0001` |
 | Icons / fonts | `lucide-react` (per-icon imports), `@fontsource` Golos Text / Unbounded / JetBrains Mono | self-hosted fonts: works offline in docker, no third-party requests |
 
 ## 5. Repository & module layout
@@ -564,11 +564,11 @@ resumes polling.
 
 ### Design system
 
-Tokens from the prototype (`--bg #F4F6FA`, `--surface #FFF`, `--ink #131926`, `--accent #1F4FD1`,
-`--wait #955800`, `--ok #1B7A4B`, `--bad #B4372B`, dark variants) as Tailwind `@theme` variables;
-Unbounded (headings), Golos Text (body), JetBrains Mono (pills, counters). Radii 6/8/999, flat
-1 px borders, focus ring 2 px accent, `prefers-reduced-motion` respected. Status pill colors:
-queued neutral, generating accent, retrying & needs_input wait, failed bad, ready ok.
+Owned by the frontend: `frontend/docs/design.md` (tokens, glass, backdrop, primitives, layouts,
+states) and `frontend/docs/adr/`. In short: prototype tokens and fonts, light theme only, a
+pastel backdrop with frosted glass only on floating controls (top bar, tabs, save bar, auth
+card), own primitives, status → tone (queued neutral, generating accent, retrying & needs_input
+wait, failed bad, ready ok).
 
 UI language: English (see §13). Dates and numbers formatted with `Intl` in the device locale.
 
@@ -588,7 +588,7 @@ Tests, most important first:
 If time runs short, cut in this order (reliability items above are never cut):
 1. AnswerAgent → as-is insertion only.
 2. Suggested roles / `fromCvId`.
-3. `GET /api/usage`, dark mode, sessionStorage autosave.
+3. `GET /api/usage`, sessionStorage autosave.
 4. Match panel UI (requirements still generated and used for the `multi` question).
 
 ## 13. Decisions
