@@ -105,9 +105,10 @@
 | лише backend (`backend/compose.yaml`) | api, worker, postgres, redis | — |
 | лише frontend (`frontend/compose.yaml`) | web | `host.docker.internal:3000` (backend на хості) |
 
-nginx резолвить `API_UPSTREAM` на кожен запит через DNS Docker, тож web стартує раніше за api і
-переживає його перезапуск. Порядок старту: postgres і redis healthy → api (виконує міграції;
-healthy, коли відповідає `GET /api/health`) → worker.
+nginx резолвить `API_UPSTREAM` на кожен запит через DNS Docker, тож web переживає перезапуск api.
+Порядок старту: postgres і redis healthy → api (виконує міграції; healthy, коли відповідає
+`GET /api/health`) → worker і, у повному стеку, web (`compose.stack.web.yaml`), тож сторінка,
+відкрита під час першого старту, не отримує 502. Лише frontend запускає web одразу.
 
 **Чому черга:** [backend/docs/adr/0001](../../backend/docs/adr/0001-queue-in-redis-status-in-postgres.md).
 **Чому опитування (polling), а не SSE/WebSocket:** [docs/adr/0001](../adr/0001-poll-statuses-not-push.md).

@@ -3,6 +3,8 @@
 include:
   # reads the root .env (ANTHROPIC_API_KEY)
   - backend/compose.yaml
-  # the web container proxies /api to the api service instead of the host
-  - path: frontend/compose.yaml
+  # the web container proxies /api to the api service instead of the host, and starts after it
+  - path:
+      - frontend/compose.yaml
+      - compose.stack.web.yaml
     env_file: compose.stack.env

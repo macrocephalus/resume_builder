@@ -73,8 +73,8 @@ Every image is built with the repo root as context (it needs `shared/` and the r
 | `pnpm stack:frontend` | web on `localhost:8080` | backend on the host port 3000 |
 
 - `compose.yaml` only `include`s `backend/compose.yaml` and `frontend/compose.yaml`; services are
-  defined once, in the subproject that owns them. `compose.stack.env` holds the whole-stack wiring
-  (`API_UPSTREAM=api:3000`).
+  defined once, in the subproject that owns them. `compose.stack.env` and `compose.stack.web.yaml`
+  hold the whole-stack wiring (`API_UPSTREAM=api:3000`; web starts once api is healthy).
 - `.env` (from `.env.example`) lives at the root; a missing `ANTHROPIC_API_KEY` stops compose
   with a clear error.
 

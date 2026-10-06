@@ -104,9 +104,10 @@ lockfile.
 | backend alone (`backend/compose.yaml`) | api, worker, postgres, redis | — |
 | frontend alone (`frontend/compose.yaml`) | web | `host.docker.internal:3000` (backend on the host) |
 
-nginx resolves `API_UPSTREAM` per request through Docker's DNS, so web starts before api and
-survives an api restart. Startup order: postgres and redis healthy → api (runs migrations;
-healthy when `GET /api/health` answers) → worker.
+nginx resolves `API_UPSTREAM` per request through Docker's DNS, so web survives an api restart.
+Startup order: postgres and redis healthy → api (runs migrations; healthy when `GET /api/health`
+answers) → worker and, in the whole stack, web (`compose.stack.web.yaml`), so a page opened during
+the first start never gets a 502. Frontend alone starts web at once.
 
 **Why a queue:** [backend/docs/adr/0001](../backend/docs/adr/0001-queue-in-redis-status-in-postgres.md).
 **Why polling, not SSE/WebSocket:** [docs/adr/0001](adr/0001-poll-statuses-not-push.md).

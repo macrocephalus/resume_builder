@@ -1,0 +1,8 @@
+# Added to frontend/compose.yaml only when the root compose.yaml runs the whole stack:
+# web opens once the api answers, so a page loaded during the first start never meets a 502.
+# frontend/compose.yaml alone has no api service to wait for.
+services:
+  web:
+    depends_on:
+      api:
+        condition: service_healthy
