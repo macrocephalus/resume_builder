@@ -154,6 +154,7 @@ shared/src/                the @cv/shared package; tsdown (ESM + CJS); no runtim
   cv-data.ts               CvData schema (eight blocks, sectionOrder) + limits
   cv-missing.ts            findMissing, isSectionEmpty, dropEmptyItems — pure
   question.ts              Question / answer schemas
+  apply-answer.ts          applyAnswer, storedAnswer, targetExists — an answer into the draft, pure
   requirements.ts          Requirement schema
   cv-language.ts           CV_LANGUAGES allow-list: names, section headings, auto-question texts
   auto-question.ts         autoQuestionText(data, part, language) — text and label of an auto question
@@ -253,7 +254,7 @@ Question kinds (as in the prototype):
 | kind | origin | UI | on answer |
 |---|---|---|---|
 | `confirm` | verifier | quoted claim + "Yes, add it" / "No" | yes → claim added to its target (bullet/skill); no → dropped |
-| `multi` | verifier + match | toggle chips + "Other, comma-separated" | ticked items appended to `skills` (dedup) |
+| `multi` | verifier + match | toggle chips + "Other, comma-separated" | ticked items and "Other" appended to `skills` (dedup) |
 | `choice` | model | chips + "Other" with input | value written to target |
 | `text` | model / auto | input | value written to target |
 
@@ -275,9 +276,16 @@ Question kinds (as in the prototype):
 Answer flow (`POST …/answer`, synchronous, in the API):
 
 1. Ownership, CV `needs_input`, question `open`, answer ≤ 1 000 chars, matches its kind.
-2. `applyAnswer` (pure): scalar targets (contacts, `period`, `degree`, …) are written directly;
-   `skills` targets append `"{label}: {value}"` (e.g. "English: B2"); `summary`/`bullets` targets
-   append the answer as a sentence/bullet.
+2. `applyAnswer` (pure, in `@cv/shared`, so the server and the frontend mocks apply an answer the
+   same way): scalar targets (contacts, `period`, `degree`, …) are written directly;
+   `summary`/`bullets`/`links` targets append the answer as a sentence/bullet/link. On `skills`,
+   never a duplicate (case-insensitive): a `choice` appends `"{label}: {value}"` (e.g.
+   "English: B2"); a `text` answer is split on commas, semicolons and line breaks and each part
+   appended as a skill; a `multi` appends the ticked options and the comma-separated "Other". An
+   answer to the whole `experience` block creates one new job with a fresh id: each non-empty line
+   is a bullet, title, company and period stay empty for the editor. The result stays within
+   `CV_LIMITS`: a value is cut to its field's length, and what doesn't fit a list's count is left
+   out, so an answer never makes the stored draft invalid.
 3. One transaction: update `data`, append `{question, answer}` to `facts`, question → `answered`,
    `version + 1`; if no open question remains → `ready` (CAS). Returns the full CV.
 

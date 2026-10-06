@@ -155,6 +155,7 @@ shared/src/                пакет @cv/shared; tsdown (ESM + CJS); з runtime
   cv-data.ts               схема CvData (вісім блоків, sectionOrder) + ліміти
   cv-missing.ts            findMissing, isSectionEmpty, dropEmptyItems — чисті функції
   question.ts              схеми Question / відповіді
+  apply-answer.ts          applyAnswer, storedAnswer, targetExists — відповідь у чернетку, чисті
   requirements.ts          схема Requirement
   cv-language.ts           allow-list CV_LANGUAGES: назви, заголовки розділів, тексти авто-питань
   auto-question.ts         autoQuestionText(data, part, language) — текст і мітка авто-питання
@@ -257,7 +258,7 @@ Worker запускає **DraftAgent**: один tool loop на AI SDK v7 з є�
 | kind | origin | UI | після відповіді |
 |---|---|---|---|
 | `confirm` | verifier | цитоване твердження + "Yes, add it" / "No" | так → твердження додається до своєї цілі (буліт/навичка); ні → відкидається |
-| `multi` | verifier + match | чипи-перемикачі + "Other, comma-separated" | позначені пункти додаються до `skills` (без дублікатів) |
+| `multi` | verifier + match | чипи-перемикачі + "Other, comma-separated" | позначені пункти й "Other" додаються до `skills` (без дублікатів) |
 | `choice` | model | чипи + "Other" з полем вводу | значення записується в ціль |
 | `text` | model / auto | поле вводу | значення записується в ціль |
 
@@ -280,9 +281,17 @@ Worker запускає **DraftAgent**: один tool loop на AI SDK v7 з є�
 
 1. Право власності, CV у статусі `needs_input`, питання `open`, відповідь ≤ 1 000 символів і
    відповідає своєму типу.
-2. `applyAnswer` (чиста): скалярні цілі (contacts, `period`, `degree`, …) записуються напряму;
-   для цілей у `skills` додається `"{label}: {value}"` (напр. "English: B2"); для цілей
-   `summary`/`bullets` відповідь додається як речення/буліт.
+2. `applyAnswer` (чиста, у `@cv/shared`, тож сервер і моки фронтенда застосовують відповідь
+   однаково): скалярні цілі (contacts, `period`, `degree`, …) записуються напряму; для цілей
+   `summary`/`bullets`/`links` відповідь додається як речення/буліт/посилання. У `skills` — без
+   дублікатів (без урахування регістру): `choice` додає `"{label}: {value}"` (напр. "English: B2");
+   відповідь `text` ділиться за комами, крапками з комою й переносами рядків, і кожна частина
+   додається як окрема навичка; `multi` додає позначені варіанти й "Other" через кому. Відповідь
+   на питання про весь блок `experience` створює одне нове місце роботи з новим id: кожен
+   непорожній рядок — буліт, посада, компанія й період лишаються порожніми для редактора.
+   Результат не виходить за `CV_LIMITS`: значення обрізається до довжини свого поля, а те, що не
+   вміщається в кількість елементів списку, не додається, тож відповідь ніколи не робить збережену
+   чернетку невалідною.
 3. Одна транзакція: оновити `data`, додати `{question, answer}` до `facts`, питання → `answered`,
    `version + 1`; якщо відкритих питань не лишилося → `ready` (CAS). Повертає повне CV.
 
