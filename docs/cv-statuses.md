@@ -160,8 +160,9 @@ The API enforces this table; anything else returns `409 INVALID_STATE`. Delete i
 - **Draft + status in one transaction.** `data`, questions, requirements, `version + 1` and the
   status are written together; a crash in between leaves the CV in `generating`, which BullMQ's
   stalled-job check re-runs.
-- **Recovery on worker start.** CVs in `queued`/`generating`/`retrying` without a live BullMQ job
-  (e.g. Redis was wiped) are re-enqueued; `jobId` = job row id, so duplicates are ignored.
+- **Recovery on worker start and every 60 s.** CVs in `queued`/`generating`/`retrying` without a
+  live BullMQ job (e.g. Redis was wiped) are re-enqueued with the same jobId — the id of their
+  `generation_jobs` row — so duplicates are ignored.
 
 ## 5. Related state machines
 
@@ -172,11 +173,16 @@ open ──answer──▶ answered      (terminal; to change it later, edit the
   └───skip────▶ skipped        (terminal; field stays empty, not rendered)
 ```
 
-### Generation attempt (`generation_jobs.status`) — audit only
+### Generation job and attempt — audit only
 
-One row per attempt: `running → succeeded | failed`. Stores model, prompt version, agent steps,
-tokens, duration and the internal error. The UI never reads it directly; `attempt` and `error` are
-copied to `cvs`.
+- `generation_jobs`: one row per generation the user started (a CV created or a manual Retry);
+  its id is the BullMQ jobId. The hourly generation limit counts these rows. No status of its own.
+- `generation_attempts.status`: one row per attempt of a job, `running → succeeded | failed`.
+  Stores model, prompt version, agent steps, tokens, duration and the internal error. An attempt
+  still `running` when its job is re-run after a crash is closed as `failed`.
+
+The UI never reads either table; `attempt` and `error` are copied to `cvs`. Columns:
+`backend/docs/architecture.md` §2.
 
 ## 6. Not statuses
 
@@ -187,4 +193,4 @@ copied to `cvs`.
 | manual edits | new `version` of `data`; status unchanged, except that removing an item skips its open questions and the last one closing moves `needs_input` → `ready` |
 | match score | computed from `data` + requirements on every render/read, never stored |
 | PDF | rendered on the fly, never stored |
-| deleted CV | row is gone (cascade to questions/jobs) |
+| deleted CV | row is gone, with its questions; its generation jobs stay, unlinked, so the hourly limit still counts them |
