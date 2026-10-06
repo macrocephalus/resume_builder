@@ -16,6 +16,12 @@ answered question; open questions stay out of this file until the user answers t
   tickets become `moved`.
 - Questions about backend internals (JWT secret, fake model at runtime, e2e infrastructure) go to
   that backend grilling, not to the root.
+- **Q11** (2026-10-06) No root spec or root tickets for the server: the contract is done and the
+  frontend already works against it, so a root spec would repeat `api.md`. A session in `backend/`
+  grills the internals and writes `backend/.scratch/server/spec.md` with `Sources:` naming
+  `docs/api.md`, `docs/cv-statuses.md`, `@cv/shared`, this log and the frontend mocks
+  (`frontend/src/mocks`) as the picture of how the server behaves. A contract gap found there comes
+  back as a root ticket. `workflow.md` §1 has the rule.
 
 ## Scope and contract
 
