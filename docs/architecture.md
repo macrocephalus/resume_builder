@@ -486,9 +486,20 @@ used — there is nothing to check them against.
 50 pt margins, embedded Liberation Sans Regular/Bold (Cyrillic), real text ⇒ selectable.
 Layout from the prototype: name 20 bold; contacts line joined with " · "; section headings
 9 pt bold uppercase with a rule, text taken from `CV_LANGUAGES[cv.language]` ("Experience" /
-"Досвід"); job heading "Title, Company" + muted period; bullets "•" indented
-14 pt; skills as one comma-joined paragraph. Contacts first, then the blocks in `data.sectionOrder`.
-Empty fields/blocks are skipped; pdfkit paginates.
+"Досвід"). Contacts first (email, phone, location, links), then the blocks in `data.sectionOrder`:
+
+| block | heading line | muted line | below |
+|---|---|---|---|
+| summary | — | — | one paragraph |
+| experience | "Title, Company" | period | bullets |
+| projects | name | "period · url" | bullets |
+| education | "Institution, Degree" | period | — |
+| certifications | "Name, Issuer" | year | — |
+| skills | — | — | one paragraph, joined with ", " |
+| languages | — | — | one paragraph: "Name (Level)", joined with ", " |
+
+Bullets "•" indented 14 pt. Empty fields/blocks are skipped, and so is the separator next to a
+missing part ("Title" alone, not "Title, "); pdfkit paginates.
 One template behind `type CvTemplate = (cv, doc) => void`. Filename = sanitised title.
 
 The in-app preview is an HTML "sheet" (A4 aspect ratio, same fonts and sizes in container-query
