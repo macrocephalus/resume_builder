@@ -163,7 +163,7 @@ Same body. `200 { "user": … }` + cookie. `401 INVALID_CREDENTIALS`; throttled 
 ### `GET /api/usage`
 ```json
 { "generations": { "used": 3, "limit": 10, "resetsAt": "…" },
-  "active": { "used": 1, "limit": 2 } }
+  "active": { "used": 1, "limit": 4 } }
 ```
 Shown on the New CV screen so the user sees a limit before hitting `429`. `generations.used`
 counts what the user started — CVs created and manual retries; automatic retries of a failed
