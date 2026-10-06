@@ -64,7 +64,7 @@ desktop, and from any device later.
                 ┌───────────────┐ same origin /api (httpOnly JWT cookie) ┌──────────────────┐
  phone / PC ───▶│ web           │ ─────────────────────────────────────▶ │ api (NestJS)     │
                 │ nginx: SPA +  │ ◀──── poll /api/cvs/statuses every 3 s │ HTTP, no LLM     │
-                │ /api proxy    │                                        │ except answers*  │
+                │ /api proxy    │                                        │ calls            │
                 └───────────────┘                                        └──┬────────┬──────┘
                                                                    Drizzle │        │ enqueue
                                                                            ▼        ▼
