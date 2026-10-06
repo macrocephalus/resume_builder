@@ -75,8 +75,9 @@ export type GenerationStage = (typeof GENERATION_STAGES)[number];
 
 ### `queued` — "In queue"
 - **Backend:** `cvs` row + `generation_jobs` row written in one transaction, then the job id is
-  added to BullMQ. `queuePosition` = number of `queued` CVs created earlier (all users) + 1 —
-  only the number leaves the server.
+  added to BullMQ. `queuePosition` = number of `queued` CVs (all users) whose latest job was
+  written earlier + 1 — so a retried CV goes behind the ones queued before the Retry, as BullMQ
+  runs it; only the number leaves the server.
 - **Frontend:** neutral badge, "N ahead of you" (no time promises). Polls.
 - **User can:** delete; close the tab — nothing is lost.
 
