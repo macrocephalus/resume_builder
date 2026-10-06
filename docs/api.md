@@ -316,3 +316,8 @@ field stays empty. `200 { "cv": Cv }`; status may become `ready`.
 | GET | `/api/cvs/:id/pdf` | ✓ | download A4 PDF |
 | POST | `/api/cvs/:id/questions/:qid/answer` | ✓ | answer a question |
 | POST | `/api/cvs/:id/questions/:qid/skip` | ✓ | skip a question |
+
+Not part of the contract: in development the api also describes itself, the Swagger UI at
+`/api/docs` and the OpenAPI document at `/api/docs-json` (`API_DOCS=true`, which `pnpm dev` sets;
+off by default, then `404`). Generated from the backend's controllers and the `@cv/shared` schemas;
+this file stays the source of truth.
