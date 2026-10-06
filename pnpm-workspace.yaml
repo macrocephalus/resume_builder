@@ -14,3 +14,11 @@ allowBuilds:
 
 # `pnpm deploy` (backend Docker image) copies workspace deps like `shared` as real files
 injectWorkspacePackages: true
+
+# Releases newer than pnpm's minimum release age, taken on purpose (added by `pnpm add`)
+minimumReleaseAgeExclude:
+  - '@ai-sdk/anthropic@4.0.72'
+  - '@ai-sdk/gateway@4.0.104'
+  - '@ai-sdk/provider-utils@5.0.54'
+  - '@ai-sdk/provider@4.0.22'
+  - ai@7.0.128
