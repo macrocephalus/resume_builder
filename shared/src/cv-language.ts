@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { AutoQuestionPart, AutoQuestionText } from './auto-question'
 import type { CvSection } from './cv-data'
 
 export type CvLanguageInfo = {
@@ -9,6 +10,8 @@ export type CvLanguageInfo = {
   nativeName: string
   /** Block headings of the preview and the PDF. */
   headings: Record<CvSection, string>
+  /** What the user is asked when the draft lacks a required part (`findMissing`). */
+  autoQuestions: Record<AutoQuestionPart, AutoQuestionText>
 }
 
 /**
@@ -30,6 +33,48 @@ export const CV_LANGUAGES = [
       skills: 'Skills',
       languages: 'Languages',
     },
+    autoQuestions: {
+      'contacts.fullName': {
+        text: 'What is your full name, as it should appear on the CV?',
+        label: 'Full name',
+      },
+      'contacts.email': {
+        text: 'What email should employers use? An email or a phone number is enough.',
+        label: 'Email',
+      },
+      'contacts.phone': {
+        text: 'What phone number should employers use? An email or a phone number is enough.',
+        label: 'Phone',
+      },
+      'summary': {
+        text: 'In two or three sentences, who are you as a professional and what do you do best?',
+        label: 'Summary',
+      },
+      'experience': {
+        text: 'Where have you worked? For each job, give the title, company, period and what you did. Skip this if you have no work experience yet.',
+        label: 'Experience',
+      },
+      'experience.title': {
+        text: 'What was your job title?',
+        label: 'Job title',
+      },
+      'experience.company': {
+        text: 'Which company was it?',
+        label: 'Company',
+      },
+      'experience.period': {
+        text: 'When did you work there? For example, 2019 – 2022.',
+        label: 'Period',
+      },
+      'education.institution': {
+        text: 'Which school or university was it?',
+        label: 'Institution',
+      },
+      'skills': {
+        text: 'Which skills and technologies do you use in your work? Separate them with commas.',
+        label: 'Skills',
+      },
+    },
   },
   {
     code: 'uk',
@@ -44,6 +89,48 @@ export const CV_LANGUAGES = [
       certifications: 'Сертифікати',
       skills: 'Навички',
       languages: 'Мови',
+    },
+    autoQuestions: {
+      'contacts.fullName': {
+        text: "Яке ваше повне ім'я — так, як воно має бути в резюме?",
+        label: "Повне ім'я",
+      },
+      'contacts.email': {
+        text: 'Яку електронну пошту дати роботодавцям? Достатньо пошти або телефону.',
+        label: 'Ел. пошта',
+      },
+      'contacts.phone': {
+        text: 'Який номер телефону дати роботодавцям? Достатньо пошти або телефону.',
+        label: 'Телефон',
+      },
+      'summary': {
+        text: 'Хто ви як фахівець і що вмієте найкраще? Двома-трьома реченнями.',
+        label: 'Профіль',
+      },
+      'experience': {
+        text: 'Де ви працювали? Для кожного місця вкажіть посаду, компанію, період і що ви робили. Пропустіть, якщо досвіду роботи ще немає.',
+        label: 'Досвід роботи',
+      },
+      'experience.title': {
+        text: 'Яка у вас була посада?',
+        label: 'Посада',
+      },
+      'experience.company': {
+        text: 'У якій компанії це було?',
+        label: 'Компанія',
+      },
+      'experience.period': {
+        text: 'Коли ви там працювали? Наприклад, 2019 – 2022.',
+        label: 'Період',
+      },
+      'education.institution': {
+        text: 'У якому навчальному закладі ви навчалися?',
+        label: 'Навчальний заклад',
+      },
+      'skills': {
+        text: 'Якими навичками й технологіями ви користуєтеся в роботі? Перелічіть через кому.',
+        label: 'Навички',
+      },
     },
   },
   {
@@ -60,6 +147,48 @@ export const CV_LANGUAGES = [
       skills: 'Umiejętności',
       languages: 'Języki',
     },
+    autoQuestions: {
+      'contacts.fullName': {
+        text: 'Jak brzmi Twoje imię i nazwisko, które ma się znaleźć w CV?',
+        label: 'Imię i nazwisko',
+      },
+      'contacts.email': {
+        text: 'Jaki adres e-mail podać pracodawcom? Wystarczy e-mail albo telefon.',
+        label: 'E-mail',
+      },
+      'contacts.phone': {
+        text: 'Jaki numer telefonu podać pracodawcom? Wystarczy e-mail albo telefon.',
+        label: 'Telefon',
+      },
+      'summary': {
+        text: 'Kim jesteś zawodowo i co robisz najlepiej? W dwóch–trzech zdaniach.',
+        label: 'Podsumowanie',
+      },
+      'experience': {
+        text: 'Jakie masz doświadczenie zawodowe? Dla każdej pracy podaj stanowisko, firmę, okres i zakres obowiązków. Pomiń, jeśli nie masz jeszcze doświadczenia zawodowego.',
+        label: 'Doświadczenie zawodowe',
+      },
+      'experience.title': {
+        text: 'Jakie było Twoje stanowisko?',
+        label: 'Stanowisko',
+      },
+      'experience.company': {
+        text: 'W jakiej firmie to było?',
+        label: 'Firma',
+      },
+      'experience.period': {
+        text: 'W jakim okresie to było? Na przykład 2019 – 2022.',
+        label: 'Okres',
+      },
+      'education.institution': {
+        text: 'Jaka to była uczelnia lub szkoła?',
+        label: 'Uczelnia',
+      },
+      'skills': {
+        text: 'Jakich umiejętności i technologii używasz w pracy? Wypisz je po przecinku.',
+        label: 'Umiejętności',
+      },
+    },
   },
   {
     code: 'de',
@@ -74,6 +203,48 @@ export const CV_LANGUAGES = [
       certifications: 'Zertifikate',
       skills: 'Kenntnisse',
       languages: 'Sprachen',
+    },
+    autoQuestions: {
+      'contacts.fullName': {
+        text: 'Wie lautet Ihr vollständiger Name, so wie er im Lebenslauf stehen soll?',
+        label: 'Vollständiger Name',
+      },
+      'contacts.email': {
+        text: 'Unter welcher E-Mail-Adresse sind Sie für Arbeitgeber erreichbar? E-Mail oder Telefon genügt.',
+        label: 'E-Mail',
+      },
+      'contacts.phone': {
+        text: 'Unter welcher Telefonnummer sind Sie für Arbeitgeber erreichbar? E-Mail oder Telefon genügt.',
+        label: 'Telefon',
+      },
+      'summary': {
+        text: 'Wer sind Sie beruflich, und was können Sie am besten? In zwei bis drei Sätzen.',
+        label: 'Profil',
+      },
+      'experience': {
+        text: 'Wo haben Sie gearbeitet? Nennen Sie für jede Stelle Position, Unternehmen, Zeitraum und Ihre Aufgaben. Überspringen Sie die Frage, wenn Sie noch keine Berufserfahrung haben.',
+        label: 'Berufserfahrung',
+      },
+      'experience.title': {
+        text: 'Welche Position hatten Sie?',
+        label: 'Position',
+      },
+      'experience.company': {
+        text: 'In welchem Unternehmen war das?',
+        label: 'Unternehmen',
+      },
+      'experience.period': {
+        text: 'Wann haben Sie dort gearbeitet? Zum Beispiel 2019 – 2022.',
+        label: 'Zeitraum',
+      },
+      'education.institution': {
+        text: 'An welcher Hochschule oder Schule war das?',
+        label: 'Bildungseinrichtung',
+      },
+      'skills': {
+        text: 'Welche Kenntnisse und Technologien nutzen Sie in Ihrer Arbeit? Bitte durch Kommas trennen.',
+        label: 'Kenntnisse',
+      },
     },
   },
   {
@@ -90,6 +261,48 @@ export const CV_LANGUAGES = [
       skills: 'Compétences',
       languages: 'Langues',
     },
+    autoQuestions: {
+      'contacts.fullName': {
+        text: "Quel est votre nom complet, tel qu'il doit figurer sur le CV ?",
+        label: 'Nom complet',
+      },
+      'contacts.email': {
+        text: 'Quelle adresse e-mail donner aux employeurs ? Un e-mail ou un téléphone suffit.',
+        label: 'E-mail',
+      },
+      'contacts.phone': {
+        text: 'Quel numéro de téléphone donner aux employeurs ? Un e-mail ou un téléphone suffit.',
+        label: 'Téléphone',
+      },
+      'summary': {
+        text: 'Qui êtes-vous sur le plan professionnel, et que faites-vous le mieux ? En deux ou trois phrases.',
+        label: 'Profil',
+      },
+      'experience': {
+        text: "Où avez-vous travaillé ? Pour chaque poste, indiquez l'intitulé, l'entreprise, la période et vos missions. Passez cette question si vous n'avez pas encore d'expérience professionnelle.",
+        label: 'Expérience professionnelle',
+      },
+      'experience.title': {
+        text: 'Quel était votre poste ?',
+        label: 'Poste',
+      },
+      'experience.company': {
+        text: 'Dans quelle entreprise était-ce ?',
+        label: 'Entreprise',
+      },
+      'experience.period': {
+        text: 'Quand y avez-vous travaillé ? Par exemple 2019 – 2022.',
+        label: 'Période',
+      },
+      'education.institution': {
+        text: 'Dans quel établissement était-ce ?',
+        label: 'Établissement',
+      },
+      'skills': {
+        text: 'Quelles compétences et technologies utilisez-vous dans votre travail ? Séparez-les par des virgules.',
+        label: 'Compétences',
+      },
+    },
   },
   {
     code: 'es',
@@ -104,6 +317,48 @@ export const CV_LANGUAGES = [
       certifications: 'Certificaciones',
       skills: 'Habilidades',
       languages: 'Idiomas',
+    },
+    autoQuestions: {
+      'contacts.fullName': {
+        text: '¿Cuál es tu nombre completo, tal como debe aparecer en el CV?',
+        label: 'Nombre completo',
+      },
+      'contacts.email': {
+        text: '¿Qué correo electrónico pueden usar las empresas para contactarte? Basta con un correo o un teléfono.',
+        label: 'Correo electrónico',
+      },
+      'contacts.phone': {
+        text: '¿Qué número de teléfono pueden usar las empresas para contactarte? Basta con un correo o un teléfono.',
+        label: 'Teléfono',
+      },
+      'summary': {
+        text: '¿Quién eres como profesional y qué haces mejor? En dos o tres frases.',
+        label: 'Perfil',
+      },
+      'experience': {
+        text: '¿Dónde has trabajado? Para cada empleo, indica el puesto, la empresa, el periodo y lo que hacías. Omite la pregunta si aún no tienes experiencia laboral.',
+        label: 'Experiencia profesional',
+      },
+      'experience.title': {
+        text: '¿Cuál era tu puesto?',
+        label: 'Puesto',
+      },
+      'experience.company': {
+        text: '¿En qué empresa trabajabas?',
+        label: 'Empresa',
+      },
+      'experience.period': {
+        text: '¿Cuándo trabajaste allí? Por ejemplo, 2019 – 2022.',
+        label: 'Periodo',
+      },
+      'education.institution': {
+        text: '¿Dónde estudiaste?',
+        label: 'Centro de estudios',
+      },
+      'skills': {
+        text: '¿Qué habilidades y tecnologías usas en tu trabajo? Sepáralas con comas.',
+        label: 'Habilidades',
+      },
     },
   },
 ] as const satisfies readonly CvLanguageInfo[]

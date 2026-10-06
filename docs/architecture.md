@@ -156,6 +156,7 @@ shared/src/                the @cv/shared package; tsdown (ESM + CJS); no runtim
   question.ts              Question / answer schemas
   requirements.ts          Requirement schema
   cv-language.ts           CV_LANGUAGES allow-list: names, section headings, auto-question texts
+  auto-question.ts         autoQuestionText(data, part, language) — text and label of an auto question
   match.ts                 computeMatch(data, requirements) — pure, used by web and backend
   api.ts                   request/response schemas of api.md
 backend/src/                 tree and rules: backend/docs/architecture.md §1
@@ -260,7 +261,10 @@ Question kinds (as in the prototype):
   never model-guessed facts ("3 / 5 / 7 years").
 - **Auto questions** (deterministic, `buildAutoQuestions`) for everything `findMissing` reports
   (§6.2): required blocks and required fields of existing items — unless the model already asked
-  about that field. The experience question can be skipped ("no experience").
+  about that field. The experience question can be skipped ("no experience"). Email and phone
+  are asked separately, each saying that one of them is enough. Text and label come from
+  `autoQuestionText(data, part, language)` in `@cv/shared`, in the CV language; a field of an item
+  is asked with the item's name in front ("Fintory: When did you work there? …").
 - **One `multi` question** "Which of these have you worked with? Only what you tick goes into the
   CV" — options = skills the model wrote but the source doesn't confirm ∪ `skill` requirements not
   covered by the CV (§7), max 8. Options are built by our code, not by the model.
@@ -300,9 +304,10 @@ text, 2 sent to you to confirm, 1 skill moved to suggestions"). The rules per fi
   (`fromCvId`) gets the parent's language preselected and may change it.
 - Allow-list `CV_LANGUAGES` in `shared/src/cv-language.ts` — one entry per language: code, English
   name (for the prompt), native name (for the select), section headings (preview + PDF) and
-  auto-question templates. Initial list: `en` English, `uk` Українська, `pl` Polski, `de` Deutsch,
-  `fr` Français, `es` Español. Adding a language = one entry. Limited to scripts the bundled
-  Liberation Sans covers (Latin, Cyrillic, Greek); CJK/Arabic would need another font.
+  auto-question texts (`autoQuestions`: a question and a label per part `findMissing` reports).
+  Initial list: `en` English, `uk` Українська, `pl` Polski, `de` Deutsch, `fr` Français,
+  `es` Español. Adding a language = one entry. Limited to scripts the bundled Liberation Sans
+  covers (Latin, Cyrillic, Greek); CJK/Arabic would need another font.
 - The server accepts only codes from the list (`400` otherwise) and puts the **English name from
   the list** into `<cv_language>`, never user text — no injection surface.
 - **Follows the CV language:** all CV text; model and auto question texts (so answers come back in
