@@ -366,7 +366,7 @@ mutation an inline error, `401` returns to login.
   `429` + `Retry-After`. A generation is what the user starts — creating a CV or a manual Retry;
   automatic retries of a failed attempt don't count.
 - Known simplifications (README): JWT can't be revoked before expiry; signup reveals that an email
-  is taken; count-then-insert race on limits is accepted.
+  is taken.
 - How it is enforced: `backend/docs/architecture.md` §6.
 
 ## 10. PDF export
