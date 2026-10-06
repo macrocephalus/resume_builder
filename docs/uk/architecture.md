@@ -132,7 +132,7 @@ Zod — єдина мова схем від env-файлу до виводу LLM
 | Ліміти запитів | `@nestjs/throttler` (вхід, прийом PDF) + лічильник генерацій у Postgres | |
 | PDF на вході | **unpdf** | лише текстовий шар, без OCR |
 | PDF на виході | **pdfkit** + вбудований TTF Liberation Sans (кирилиця) | відхилено: Puppeteer (Chromium в образі, HTML-ін'єкції), LaTeX (розмір образу, екранування), @react-pdf/renderer (React на сервері заради одного шаблону) |
-| Логи | `nestjs-pino` | request id, job id, cv id у кожному рядку; ніколи — текст джерела |
+| Логи | `nestjs-pino` (+ pino-pretty у dev) | request id, job id, cv id у кожному рядку; текст джерела, відповіді й промпт — лише з `LOG_CONTENT` (dev) |
 | **Фронтенд** | React 19 + Vite 8 + **React Compiler** | конвенції у `frontend/CLAUDE.md` |
 | Маршрутизація | React Router 8, data mode (`createBrowserRouter`, `lazy` для маршрутів) | |
 | Серверний стан | **TanStack Query 5** | єдиний кеш серверних даних; опитування через `refetchInterval` |

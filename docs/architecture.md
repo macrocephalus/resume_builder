@@ -131,7 +131,7 @@ schema language from the env file to the LLM output.
 | Rate limits | `@nestjs/throttler` (login, ingest) + count of generations in Postgres | |
 | PDF in | **unpdf** | text layer only, no OCR |
 | PDF out | **pdfkit** + bundled Liberation Sans TTF (Cyrillic) | Puppeteer (Chromium in image, HTML injection), LaTeX (image size, escaping), @react-pdf/renderer (React on the server for one template) rejected |
-| Logs | `nestjs-pino` | request id, job id, cv id on every line; never source text |
+| Logs | `nestjs-pino` (+ pino-pretty in dev) | request id, job id, cv id on every line; source text, answers and the prompt only with `LOG_CONTENT` (dev) |
 | **Frontend** | React 19 + Vite 8 + **React Compiler** | conventions in `frontend/CLAUDE.md` |
 | Routing | React Router 8, data mode (`createBrowserRouter`, route `lazy`) | |
 | Server state | **TanStack Query 5** | the only cache of server data; polling via `refetchInterval` |
