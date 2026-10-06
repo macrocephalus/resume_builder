@@ -3,10 +3,12 @@ packages:
   - backend
   - shared
 
-# Install scripts: @swc/core fetches its native binary; esbuild and msgpackr-extract have
-# platform packages / JS fallbacks and need none
+# Install scripts: @swc/core fetches its native binary; argon2 picks its prebuilt binary (and
+# compiles only if none fits); esbuild and msgpackr-extract have platform packages / JS
+# fallbacks and need none
 allowBuilds:
   '@swc/core': true
+  argon2: true
   esbuild: false
   msgpackr-extract: false
 
