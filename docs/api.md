@@ -163,13 +163,12 @@ Same body. `200 { "user": … }` + cookie. `401 INVALID_CREDENTIALS`; throttled 
 ### `GET /api/usage`
 ```json
 { "generations": { "used": 3, "limit": 10, "resetsAt": "…" },
-  "active": { "used": 1, "limit": 2 },
-  "answers": { "used": 4, "limit": 60, "resetsAt": "…" } }
+  "active": { "used": 1, "limit": 2 } }
 ```
 Shown on the New CV screen so the user sees a limit before hitting `429`. `generations.used`
 counts what the user started — CVs created and manual retries; automatic retries of a failed
 attempt don't count.
-The hourly counters use a sliding window: `used` counts the last 60 minutes, and `resetsAt` is
+The hourly counter uses a sliding window: `used` counts the last 60 minutes, and `resetsAt` is
 when the oldest counted event leaves that window, so one more becomes available then (with
 `used: 0`, an hour from now). `Retry-After` of a `429 RATE_LIMITED` points at the same moment.
 
@@ -288,7 +287,6 @@ Body depends on the question kind:
 - Synchronous (applied as described in [architecture.md §6.5](architecture.md#65-questions--answers));
   the answer goes into the CV as written.
 - `200 { "cv": Cv }` — field updated, question `answered`, `version + 1`, status may become `ready`.
-- `429 RATE_LIMITED` above 60 answers/hour.
 
 ### `POST /api/cvs/:id/questions/:questionId/skip`
 No body. `text` / `choice` / `multi` only (`confirm` must be answered). Question → `skipped`,

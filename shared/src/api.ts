@@ -80,7 +80,6 @@ const hourlyCounter = counter.extend({ resetsAt: timestamp })
 export const usageResponseSchema = z.object({
   generations: hourlyCounter,
   active: counter,
-  answers: hourlyCounter,
 })
 export type Usage = z.infer<typeof usageResponseSchema>
 

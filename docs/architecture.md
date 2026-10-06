@@ -128,7 +128,7 @@ schema language from the env file to the LLM output.
 | Queue | BullMQ (`@nestjs/bullmq`) + Redis 7 | |
 | LLM | **Vercel AI SDK v7** (`ai`) + `@ai-sdk/anthropic` directly (no AI Gateway → only one secret) | model from env, default `claude-sonnet-5-5`|
 | Auth | `@nestjs/jwt`, `cookie-parser`, **argon2** | JWT in httpOnly cookie, no session table |
-| Rate limits | `@nestjs/throttler` (login, ingest) + counts in Postgres (generation, answers) | |
+| Rate limits | `@nestjs/throttler` (login, ingest) + count of generations in Postgres | |
 | PDF in | **unpdf** | text layer only, no OCR |
 | PDF out | **pdfkit** + bundled Liberation Sans TTF (Cyrillic) | Puppeteer (Chromium in image, HTML injection), LaTeX (image size, escaping), @react-pdf/renderer (React on the server for one template) rejected |
 | Logs | `nestjs-pino` | request id, job id, cv id on every line; never source text |
@@ -362,7 +362,7 @@ mutation an inline error, `401` returns to login.
 - Sessions are a JWT in an `httpOnly` cookie set by signup/login; same error for unknown email and
   wrong password.
 - Every CV belongs to one user; someone else's CV ⇒ `404`, not `403`.
-- Limits: 10 generations/user/hour, ≤ 2 in progress per user, 60 answers/hour, ingest 20/min →
+- Limits: 10 generations/user/hour, ≤ 2 in progress per user, ingest 20/min →
   `429` + `Retry-After`. A generation is what the user starts — creating a CV or a manual Retry;
   automatic retries of a failed attempt don't count.
 - Known simplifications (README): JWT can't be revoked before expiry; signup reveals that an email
