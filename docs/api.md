@@ -10,7 +10,7 @@
 - Base path `/api`, same origin as the SPA (nginx / Vite proxy). JSON in and out, except
   `POST /api/ingest/pdf` (multipart) and `GET /api/cvs/:id/pdf` (binary).
 - **Auth:** JWT in an `httpOnly` cookie set by signup/login; the frontend never sees the token.
-  Everything except `signup`/`login` and `health` requires it → `401 UNAUTHORIZED`.
+  Everything except `signup`/`login`, `logout` and `health` requires it → `401 UNAUTHORIZED`.
 - A CV that doesn't exist **or belongs to another user** → `404 NOT_FOUND` (never `403`).
 - Ids are UUIDs. Timestamps are ISO-8601 UTC; the frontend formats them in the device locale.
 - Bodies are parsed with Zod; unknown keys are stripped (a `userId` in a body is ignored).
