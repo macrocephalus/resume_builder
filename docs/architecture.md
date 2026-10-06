@@ -362,7 +362,7 @@ mutation an inline error, `401` returns to login.
 - Sessions are a JWT in an `httpOnly` cookie set by signup/login; same error for unknown email and
   wrong password.
 - Every CV belongs to one user; someone else's CV ⇒ `404`, not `403`.
-- Limits: 10 generations/user/hour, ≤ 2 in progress per user, ingest 20/min →
+- Limits: 10 generations/user/hour, ≤ 4 in progress per user, ingest 20/min →
   `429` + `Retry-After`. A generation is what the user starts — creating a CV or a manual Retry;
   automatic retries of a failed attempt don't count.
 - Known simplifications (README): JWT can't be revoked before expiry; signup reveals that an email

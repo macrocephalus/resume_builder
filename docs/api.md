@@ -36,7 +36,7 @@
 | 415 | `UNSUPPORTED_FILE` | not a PDF (checked by magic bytes, not by extension) |
 | 422 | `PDF_UNREADABLE` | broken PDF or no text layer (scan) |
 | 429 | `RATE_LIMITED` | hourly limit; `Retry-After` header (s), `details.limit` |
-| 429 | `TOO_MANY_ACTIVE` | already 2 CVs in progress |
+| 429 | `TOO_MANY_ACTIVE` | already 4 CVs in progress |
 | 500 | `DATA_CORRUPT` | stored CV failed schema validation |
 | 500 | `INTERNAL` | anything else; generic message, details only in logs |
 
