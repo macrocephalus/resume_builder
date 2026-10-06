@@ -5,8 +5,9 @@ packages:
 
 # Install scripts: @swc/core fetches its native binary; argon2 picks its prebuilt binary (and
 # compiles only if none fits); esbuild and msgpackr-extract have platform packages / JS
-# fallbacks and need none
+# fallbacks and need none; @scarf/scarf (via swagger-ui-dist) only sends install telemetry
 allowBuilds:
+  '@scarf/scarf': false
   '@swc/core': true
   argon2: true
   esbuild: false
