@@ -130,7 +130,9 @@ export type GenerationStage = (typeof GENERATION_STAGES)[number];
 
 ### `ready` — "Ready"
 - **Backend:** draft saved, no open questions. PDF is rendered from current `data` on each download.
-- **Frontend:** success badge; editor, match panel, preview, Download PDF. No questions panel.
+- **Frontend:** success badge; editor, match panel, preview, Download PDF. The questions panel
+  stays while the CV has questions: it says none are open and lists the closed ones with their
+  answers; a CV that never had questions has none.
 - **User can:** edit, download PDF, create a CV for a suggested role, delete.
 
 ## 3. Allowed actions by status
