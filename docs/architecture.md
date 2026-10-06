@@ -262,8 +262,9 @@ Question kinds (as in the prototype):
   never model-guessed facts ("3 / 5 / 7 years").
 - **Auto questions** (deterministic, `buildAutoQuestions`) for everything `findMissing` reports
   (§6.2): required blocks and required fields of existing items — unless the model already asked
-  about that field. The experience question can be skipped ("no experience"). Email and phone
-  are asked separately, each saying that one of them is enough. Text and label come from
+  about that field. The experience question asks for the most recent job, one point per line
+  (its answer becomes a new job), and can be skipped ("no experience"). Email and phone are asked
+  separately, each saying that one of them is enough. Text and label come from
   `autoQuestionText(data, part, language)` in `@cv/shared`, in the CV language; a field of an item
   is asked with the item's name in front ("Fintory: When did you work there? …").
 - **One `multi` question** "Which of these have you worked with? Only what you tick goes into the

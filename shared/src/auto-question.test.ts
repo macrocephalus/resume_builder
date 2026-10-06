@@ -29,6 +29,12 @@ describe('wording an auto question', () => {
     })
   })
 
+  it('asks for the most recent job, one point per line, when the draft has no experience', () => {
+    expect(autoQuestionText(emptyDraft(), { section: 'experience' }, 'en').text).toBe(
+      'What did you do in your most recent job? One point per line. Add the title, company and dates in the editor. Skip this if you have no work experience yet.',
+    )
+  })
+
   it('names the item a missing field belongs to', () => {
     const draft = fullDraft()
     draft.experience[0]!.period = null

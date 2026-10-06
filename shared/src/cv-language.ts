@@ -51,7 +51,7 @@ export const CV_LANGUAGES = [
         label: 'Summary',
       },
       'experience': {
-        text: 'Where have you worked? For each job, give the title, company, period and what you did. Skip this if you have no work experience yet.',
+        text: 'What did you do in your most recent job? One point per line. Add the title, company and dates in the editor. Skip this if you have no work experience yet.',
         label: 'Experience',
       },
       'experience.title': {
@@ -108,7 +108,7 @@ export const CV_LANGUAGES = [
         label: 'Профіль',
       },
       'experience': {
-        text: 'Де ви працювали? Для кожного місця вкажіть посаду, компанію, період і що ви робили. Пропустіть, якщо досвіду роботи ще немає.',
+        text: 'Що ви робили на останньому місці роботи? Кожен пункт з нового рядка. Посаду, компанію й дати додайте в редакторі. Пропустіть, якщо досвіду роботи ще немає.',
         label: 'Досвід роботи',
       },
       'experience.title': {
@@ -165,7 +165,7 @@ export const CV_LANGUAGES = [
         label: 'Podsumowanie',
       },
       'experience': {
-        text: 'Jakie masz doświadczenie zawodowe? Dla każdej pracy podaj stanowisko, firmę, okres i zakres obowiązków. Pomiń, jeśli nie masz jeszcze doświadczenia zawodowego.',
+        text: 'Jakie były Twoje obowiązki w ostatniej pracy? Każdy punkt w nowej linii. Stanowisko, firmę i daty dodaj w edytorze. Pomiń, jeśli nie masz jeszcze doświadczenia zawodowego.',
         label: 'Doświadczenie zawodowe',
       },
       'experience.title': {
@@ -222,7 +222,7 @@ export const CV_LANGUAGES = [
         label: 'Profil',
       },
       'experience': {
-        text: 'Wo haben Sie gearbeitet? Nennen Sie für jede Stelle Position, Unternehmen, Zeitraum und Ihre Aufgaben. Überspringen Sie die Frage, wenn Sie noch keine Berufserfahrung haben.',
+        text: 'Was haben Sie in Ihrer letzten Stelle gemacht? Ein Punkt pro Zeile. Position, Unternehmen und Zeitraum tragen Sie im Editor ein. Überspringen Sie die Frage, wenn Sie noch keine Berufserfahrung haben.',
         label: 'Berufserfahrung',
       },
       'experience.title': {
@@ -279,7 +279,7 @@ export const CV_LANGUAGES = [
         label: 'Profil',
       },
       'experience': {
-        text: "Où avez-vous travaillé ? Pour chaque poste, indiquez l'intitulé, l'entreprise, la période et vos missions. Passez cette question si vous n'avez pas encore d'expérience professionnelle.",
+        text: "Qu'avez-vous fait dans votre dernier poste ? Un point par ligne. Ajoutez l'intitulé, l'entreprise et les dates dans l'éditeur. Passez cette question si vous n'avez pas encore d'expérience professionnelle.",
         label: 'Expérience professionnelle',
       },
       'experience.title': {
@@ -336,7 +336,7 @@ export const CV_LANGUAGES = [
         label: 'Perfil',
       },
       'experience': {
-        text: '¿Dónde has trabajado? Para cada empleo, indica el puesto, la empresa, el periodo y lo que hacías. Omite la pregunta si aún no tienes experiencia laboral.',
+        text: '¿Qué hacías en tu último empleo? Un punto por línea. Añade el puesto, la empresa y las fechas en el editor. Omite la pregunta si aún no tienes experiencia laboral.',
         label: 'Experiencia profesional',
       },
       'experience.title': {
