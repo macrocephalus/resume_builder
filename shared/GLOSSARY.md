@@ -40,6 +40,14 @@ _Avoid_: clarification, prompt, task
 A statement about the user that came from their answer to a question; it belongs to one CV and, together with the source, is the only thing the draft may rely on.
 _Avoid_: user answer, memory, note
 
+**Suggested role**:
+Another role the draft of a CV also fits, offered to the user as "Also fits"; picking one starts a new CV for it, so the CV's own target role never changes.
+_Avoid_: related role, alternative role, recommendation
+
+**Parent CV**:
+The CV a new one is started from for a suggested role; the new CV reuses its source and facts and is otherwise independent of it.
+_Avoid_: original CV, base CV, template
+
 **Role context**:
 Optional free text about the target role — a short note or a pasted vacancy; it describes the role, never the person, so it is not a source of facts.
 _Avoid_: role note, job description, vacancy
