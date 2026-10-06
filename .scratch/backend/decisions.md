@@ -33,3 +33,20 @@ answered question; open questions stay out of this file until the user answers t
 - **Q9** Product terms **Claim** (a statement about the person in a draft; rests on the source or a
   fact) and **Requirement** (what the role needs; drives the match) go into `shared/GLOSSARY.md`;
   **Evidence** is a backend term. Root §6.6 and backend §4 use these words.
+
+## Checked against the frontend (2026-10-06)
+
+The frontend is done on MSW mocks (`frontend/src/mocks`); every endpoint, field and status code it
+uses matches `api.md`, and the mocks already follow Q2 (answer as written) and Q8 (what counts as a
+generation). The mocks are a working picture of the server, but they leave out what the server
+must still do:
+
+- the answer limit (60 an hour, `429 RATE_LIMITED`);
+- the PDF checks: ≤ 10 pages (`413`) and 20 uploads a minute (`429`); the mock fakes `422` by file
+  name;
+- `retrying` when the AI service is down: the mock's failure goes from `generating` straight to
+  `failed`, the server retries first and fails only when the attempts run out.
+
+Frontend-only gaps (its own tracker, not the root): usage is not refreshed after a manual retry
+or an answer; a manual retry shows no `Retry-After` on `429`; `mocks/answers.ts` still names the
+AnswerAgent.
