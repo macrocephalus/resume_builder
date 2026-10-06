@@ -33,6 +33,8 @@ answered question; open questions stay out of this file until the user answers t
 - **Q9** Product terms **Claim** (a statement about the person in a draft; rests on the source or a
   fact) and **Requirement** (what the role needs; drives the match) go into `shared/GLOSSARY.md`;
   **Evidence** is a backend term. Root §6.6 and backend §4 use these words.
+- **Q10** A `sourceText` over 20 000 chars gets `400 VALIDATION_ERROR` from the shared schema, with
+  the field in `details.fields`; `413 INPUT_TOO_LARGE` is left to the PDF limits (5 MB, 10 pages).
 
 ## Checked against the frontend (2026-10-06)
 

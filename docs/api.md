@@ -32,7 +32,7 @@
 | 409 | `EMAIL_TAKEN` | signup with an existing email |
 | 409 | `VERSION_CONFLICT` | `version` in PATCH is stale; `details.currentVersion` |
 | 409 | `INVALID_STATE` | action not allowed in the current CV / question status |
-| 413 | `INPUT_TOO_LARGE` | PDF > 5 MB or > 10 pages; text > 20 000 chars |
+| 413 | `INPUT_TOO_LARGE` | PDF > 5 MB or > 10 pages |
 | 415 | `UNSUPPORTED_FILE` | not a PDF (checked by magic bytes, not by extension) |
 | 422 | `PDF_UNREADABLE` | broken PDF or no text layer (scan) |
 | 429 | `RATE_LIMITED` | hourly limit; `Retry-After` header (s), `details.limit` |
@@ -213,8 +213,9 @@ Another role from an existing CV (suggested-role chip):
 | `sourceFilename` | optional, ≤ 200 chars, display only |
 
 `202 { "cv": Cv }` with `status: "queued"`, `data: null`.
-Errors: `400`, `404` (`fromCvId` not own), `409 INVALID_STATE` (`fromCvId` has no draft),
-`413`, `429 RATE_LIMITED`, `429 TOO_MANY_ACTIVE`. The frontend disables Submit while pending.
+Errors: `400 VALIDATION_ERROR` (also `sourceText` over 20 000 chars, in `details.fields`), `404`
+(`fromCvId` not own), `409 INVALID_STATE` (`fromCvId` has no draft), `429 RATE_LIMITED`,
+`429 TOO_MANY_ACTIVE`. The frontend disables Submit while pending.
 
 ### `GET /api/cvs` — list
 `200 { "items": CvSummary[] }`, sorted by `updatedAt` desc. No pagination (simplification).

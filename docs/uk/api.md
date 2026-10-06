@@ -35,7 +35,7 @@
 | 409 | `EMAIL_TAKEN` | реєстрація з уже зайнятим email |
 | 409 | `VERSION_CONFLICT` | `version` у PATCH застаріла; `details.currentVersion` |
 | 409 | `INVALID_STATE` | дія не дозволена в поточному статусі резюме / запитання |
-| 413 | `INPUT_TOO_LARGE` | PDF > 5 МБ або > 10 сторінок; текст > 20 000 символів |
+| 413 | `INPUT_TOO_LARGE` | PDF > 5 МБ або > 10 сторінок |
 | 415 | `UNSUPPORTED_FILE` | не PDF (перевіряється за сигнатурою — magic bytes, а не за розширенням) |
 | 422 | `PDF_UNREADABLE` | пошкоджений PDF або немає текстового шару (скан) |
 | 429 | `RATE_LIMITED` | погодинний ліміт; заголовок `Retry-After` (у секундах), `details.limit` |
@@ -219,8 +219,9 @@ Email очищується від пробілів на краях і перев
 | `sourceFilename` | необов'язкове, ≤ 200 символів, лише для відображення |
 
 `202 { "cv": Cv }` зі `status: "queued"`, `data: null`.
-Помилки: `400`, `404` (`fromCvId` не належить користувачеві), `409 INVALID_STATE` (у `fromCvId`
-немає чернетки), `413`, `429 RATE_LIMITED`, `429 TOO_MANY_ACTIVE`. Поки запит виконується,
+Помилки: `400 VALIDATION_ERROR` (зокрема `sourceText` довший за 20 000 символів, у `details.fields`),
+`404` (`fromCvId` не належить користувачеві), `409 INVALID_STATE` (у `fromCvId` немає чернетки),
+`429 RATE_LIMITED`, `429 TOO_MANY_ACTIVE`. Поки запит виконується,
 фронтенд блокує кнопку Submit.
 
 ### `GET /api/cvs` — список
