@@ -167,6 +167,9 @@ Same body. `200 { "user": … }` + cookie. `401 INVALID_CREDENTIALS`; throttled 
   "answers": { "used": 4, "limit": 60, "resetsAt": "…" } }
 ```
 Shown on the New CV screen so the user sees a limit before hitting `429`.
+The hourly counters use a sliding window: `used` counts the last 60 minutes, and `resetsAt` is
+when the oldest counted event leaves that window, so one more becomes available then (with
+`used: 0`, an hour from now). `Retry-After` of a `429 RATE_LIMITED` points at the same moment.
 
 ---
 
