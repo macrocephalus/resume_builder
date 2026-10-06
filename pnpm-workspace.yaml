@@ -3,5 +3,12 @@ packages:
   - backend
   - shared
 
+# Install scripts: @swc/core fetches its native binary; esbuild and msgpackr-extract have
+# platform packages / JS fallbacks and need none
+allowBuilds:
+  '@swc/core': true
+  esbuild: false
+  msgpackr-extract: false
+
 # `pnpm deploy` (backend Docker image) copies workspace deps like `shared` as real files
 injectWorkspacePackages: true
