@@ -388,7 +388,8 @@ headings 9 pt bold uppercase with a rule, text taken from `CV_LANGUAGES[cv.langu
 | languages | — | — | one paragraph: "Name (Level)", joined with ", " |
 
 Bullets "•" indented 14 pt. Empty fields/blocks are skipped, and so is the separator next to a
-missing part ("Title" alone, not "Title, "). Filename = sanitised title. How it is drawn
+missing part ("Title" alone, not "Title, "). Filename = sanitised title (ASCII, with the whole
+title in `filename*` when it has other letters; `docs/api.md`). How it is drawn
 (pdfkit, fonts, margins, pages): `backend/docs/architecture.md` §7.
 
 The in-app preview is an HTML "sheet" (A4 aspect ratio, same fonts and sizes in container-query

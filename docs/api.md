@@ -263,8 +263,9 @@ limits (`429`). `202 { "cv": Cv }`.
 
 ### `GET /api/cvs/:id/pdf`
 Status `needs_input` / `ready`. `200 application/pdf`,
-`Content-Disposition: attachment; filename="<sanitised title>.pdf"`. A4, selectable text, rendered
-from the **saved** `data` (the client saves first).
+`Content-Disposition: attachment; filename="<sanitised title>.pdf"`; a title with non-Latin letters
+also comes whole in `filename*=UTF-8''…` (the plain `filename` keeps its ASCII part, or "CV"). A4,
+selectable text, rendered from the **saved** `data` (the client saves first).
 
 ---
 

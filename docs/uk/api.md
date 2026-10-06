@@ -271,8 +271,10 @@ Email очищується від пробілів на краях і перев
 
 ### `GET /api/cvs/:id/pdf`
 Статус `needs_input` / `ready`. `200 application/pdf`,
-`Content-Disposition: attachment; filename="<sanitised title>.pdf"`. Формат A4, текст можна
-виділяти, рендериться зі **збереженого** `data` (клієнт спершу зберігає зміни).
+`Content-Disposition: attachment; filename="<sanitised title>.pdf"`; назва з нелатинськими літерами
+додатково приходить повністю у `filename*=UTF-8''…` (звичайний `filename` зберігає її ASCII-частину
+або "CV"). Формат A4, текст можна виділяти, рендериться зі **збереженого** `data` (клієнт спершу
+зберігає зміни).
 
 ---
 
