@@ -317,6 +317,7 @@ one loop, written down in `workflow.md`:
 | `backend/README.md` | Running the backend alone, its checks, and how logging works and is switched |
 | `backend/docs/architecture.md` | Modules, tables, the generation agent, verification, failures and recovery, auth, logs, tests |
 | `backend/docs/adr/0001–0007` | The queue, one status per CV, the agent's tool loop, evidence quotes, pdfkit, JWT cookie, Swagger |
+| `frontend/README.md` | Running the frontend alone (with the real API or the mock), its stack, structure, scripts and tests |
 | `frontend/docs/architecture.md` | Layers, routes, data fetching, polling, the editor, mock mode, tests |
 | `frontend/docs/design.md` | The look: tokens, type, components, the glass layer |
 | `frontend/docs/adr/0001–0003` | Frosted glass on one layer, the four layers, mock mode outside the layers |
