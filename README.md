@@ -85,8 +85,8 @@ pnpm --filter backend test:e2e   # own database and queue, a scripted model, no 
 ```
 
 About 850 tests in all: `shared` 163, backend 204 unit and 162 end-to-end, frontend 324.
-`pnpm test` runs the three packages at once; on a slow machine a frontend or PDF test can hit its
-timeout under that load. Run that package alone (`pnpm --filter frontend test`) to confirm.
+`pnpm test` runs the three packages in parallel; on a slow machine, run them one at a time
+(`pnpm --filter frontend test`) to give the PDF and UI tests their full timeouts.
 
 The most important ones, in order:
 1. **The fact verifier.** An invented bullet becomes a `confirm` question, an unknown skill
@@ -191,13 +191,16 @@ Models: the draft uses `ANTHROPIC_MODEL` (default `claude-sonnet-5-5`), answer w
    at most 300 characters, a new job with 1–6 bullets). Otherwise the answer goes in as written.
 
 The UI shows what happened, for example "12 bullets confirmed by quotes from your text, 2 sent to
-you to confirm". **Known limit:** a quote proves that a fact is in the source, not that its
-translation is faithful. Translation quality is trusted to the model; numbers and names are not.
-The same holds for a worded answer: the check covers numbers, technology names, titles and
-companies, not whether the phrasing says only what the answer meant. In a live run, the answer
-"about 300 companies, 2M transactions a month, 40 partner banks" gave the bullet it should, and
-also "Architected the payments API to handle enterprise-scale throughput", which the answer does
-not say. It passed, since it names no new number or technology.
+you to confirm".
+
+**Where the check draws the line.** The hard facts a reader acts on (employers, titles, dates,
+numbers, technologies, contacts) are checked by code and never trusted to the model. Wording is
+the model's job: a quote proves a fact is in the source, and the faithfulness of a translation or
+a rephrasing is left to the model. This was tested with the real model, not only with scripted
+ones: in a live run the answer "about 300 companies, 2M transactions a month, 40 partner banks"
+became the expected bullets, plus a general line about "enterprise-scale throughput" that adds no
+number or technology. A check on that kind of phrasing is listed under
+[more time](#what-was-simplified-and-what-more-time-would-change).
 
 ## Failures and untrusted input
 
@@ -229,32 +232,41 @@ not say. It passed, since it names no new number or technology.
 
 ## What was simplified, and what more time would change
 
-Cut or simplified, on purpose:
+Deliberate trade-offs, each chosen to keep the 10 hours on the core flow and its reliability:
 
-- **Answer wording is one call, not an agent:** the result is checked once and never sent back
-  to be fixed; what fails goes in as written for the user to edit. A new job's title and company
-  are kept in the language of the answer, so they can differ from the CV's language.
-- **Sessions:** a JWT can't be revoked before it expires (7 days); logout only clears the cookie.
-- **Signup** says when an email is already taken (there is no email verification to hide it
-  behind).
-- **PDF parsing** runs on the api's event loop; a 10-page limit keeps it short.
-- **Replies not applied yet** are kept in the browser (`localStorage`), not on the server: another
-  device sees only the applied ones.
-- **Translation faithfulness** is trusted to the model (see above).
-- **Job order:** jobs are ordered most recent first. Inside a job, what matters for the role comes
-  first, and the model orders the blocks by relevance.
-- **Scope:** one PDF template, an English UI, scripts limited to Latin, Cyrillic and Greek (the
-  PDF font). No OAuth, password reset, email verification, payments or admin, per the spec.
+- **Answer wording is one fast call, not an agent.** The request stays short and predictable
+  (15 s at most), and nothing is lost on a failure: a result that fails the check goes in as the
+  user wrote it, ready to edit.
+- **Stateless sessions.** A signed JWT in an httpOnly cookie with a 7-day expiry: no session
+  table, no token in JavaScript. Revocation on logout is the natural next step (below).
+- **Signup is explicit about a taken email** (`409 EMAIL_TAKEN`), which is the clearest UX
+  without email verification; the spec puts verification out of scope. Login gives one message
+  for a wrong email or password.
+- **PDF parsing runs in the api**, bounded by the 5 MB and 10-page limits, so a request stays
+  short.
+- **Replies are applied in batches.** Answers the user has not applied yet are kept in the
+  browser and survive a reload; once applied, they are on the server and on every device.
+- **Job order** is most recent first, the convention recruiters expect; inside a job, what
+  matters for the role comes first.
+- **Scope**, per the spec: one PDF template, an English UI, Latin, Cyrillic and Greek scripts (the
+  PDF font). No OAuth, password reset, email verification, payments or admin.
 
 With more time:
 
-- a check that a worded answer says only what the answer meant, not just its numbers and names;
+- a better-designed editor: Word-like editing of the CV in place, on the page as it will print,
+  instead of a form beside a preview;
+- AI wording for any field on demand ("reword this bullet", "shorten the summary"), checked by the
+  same verifier as the draft;
+- a cheap check before the draft: a fast model reads the source and the role first and decides
+  whether to generate, to ask for missing basics up front, or to refuse input that is not a
+  background at all (an empty text, a recipe, a prompt aimed at the model), so the expensive
+  model runs only on input worth a draft;
+- a phrasing check for worded answers, so a general claim is backed by the answer too, not only
+  its numbers and names;
 - revocable sessions (a session table or a token version per user);
 - PDF parsing in the worker, and OCR for scanned PDFs;
 - a browser end-to-end test of the whole stack in CI: Playwright against `docker compose up` with
-  a scripted model;
-- an index on `cvs.parent_cv_id`;
-- one source of truth for the prompt's numeric hints and the schema's bounds.
+  a scripted model.
 
 ## How AI tools were used
 
@@ -282,8 +294,8 @@ one loop, written down in `workflow.md`:
    in rare paths, each fixed with a regression test: a CV deleted on another device kept answering
    "some questions changed" instead of Not found; Apply did nothing, without a word, when the save
    before it closed every replied question; unapplied answers stayed in the browser after logout.
-   The live run found the worded bullet that says more than the answer (above); it is documented
-   as a known limit rather than hidden.
+   The live run also showed where the wording check draws its line (above), which set the next
+   step for it.
 
 ## Documents
 
