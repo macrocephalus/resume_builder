@@ -104,6 +104,7 @@
 | весь стек (кореневий `compose.yaml`) | web, api, worker, postgres, redis | `api:3000` (задано в `compose.stack.env`) |
 | лише backend (`backend/compose.yaml`) | api, worker, postgres, redis | — |
 | лише frontend (`frontend/compose.yaml`) | web | `host.docker.internal:3000` (backend на хості) |
+| розробка (кореневий `pnpm dev`) | postgres, redis; api, worker і Vite на хості, у режимі watch | проксі Vite → `localhost:3000` |
 
 nginx резолвить `API_UPSTREAM` на кожен запит через DNS Docker, тож web переживає перезапуск api.
 Порядок старту: postgres і redis healthy → api (виконує міграції; healthy, коли відповідає

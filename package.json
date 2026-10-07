@@ -13,6 +13,7 @@
     "build": "pnpm -r build",
     "stack": "docker compose up --build",
     "stack:backend": "docker compose -f backend/compose.yaml --env-file .env up --build",
-    "stack:frontend": "docker compose -f frontend/compose.yaml up --build"
+    "stack:frontend": "docker compose -f frontend/compose.yaml up --build",
+    "dev": "docker compose stop web api worker && docker compose up -d --wait postgres redis && pnpm --filter @cv/shared build && pnpm --filter backend --filter frontend --parallel run \"/^dev(:worker)?$/\""
   }
 }

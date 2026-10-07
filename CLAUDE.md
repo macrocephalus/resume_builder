@@ -71,12 +71,15 @@ Every image is built with the repo root as context (it needs `shared/` and the r
 | `docker compose up --build` (`pnpm stack`) | web, api, worker, postgres, redis | the `api` service |
 | `pnpm stack:backend` | api, worker, postgres, redis | — (API on `localhost:3000`) |
 | `pnpm stack:frontend` | web on `localhost:8080` | backend on the host port 3000 |
+| `pnpm dev` | postgres, redis; api, worker and Vite run on the host in watch mode | Vite on `localhost:5173` → api on 3000 |
 
 - `compose.yaml` only `include`s `backend/compose.yaml` and `frontend/compose.yaml`; services are
   defined once, in the subproject that owns them. `compose.stack.env` and `compose.stack.web.yaml`
   hold the whole-stack wiring (`API_UPSTREAM=api:3000`; web starts once api is healthy).
 - `.env` (from `.env.example`) lives at the root; a missing `ANTHROPIC_API_KEY` stops compose
   with a clear error.
+- `pnpm dev` stops the stack's web, api and worker first: they hold the same ports and read the
+  same queue. It builds `shared` once; restart it after a change in `shared/`.
 
 `docs/uk/` holds Ukrainian translations of these three files for the user. English is the source
 of truth; when an English design doc changes, update its `docs/uk/` copy in the same change.

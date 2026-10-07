@@ -103,6 +103,7 @@ lockfile.
 | whole stack (root `compose.yaml`) | web, api, worker, postgres, redis | `api:3000` (set in `compose.stack.env`) |
 | backend alone (`backend/compose.yaml`) | api, worker, postgres, redis | — |
 | frontend alone (`frontend/compose.yaml`) | web | `host.docker.internal:3000` (backend on the host) |
+| development (root `pnpm dev`) | postgres, redis; api, worker and Vite on the host, in watch mode | Vite's proxy → `localhost:3000` |
 
 nginx resolves `API_UPSTREAM` per request through Docker's DNS, so web survives an api restart.
 Startup order: postgres and redis healthy → api (runs migrations; healthy when `GET /api/health`
