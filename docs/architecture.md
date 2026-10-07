@@ -63,8 +63,8 @@ desktop, and from any device later.
 ```
                 ┌───────────────┐ same origin /api (httpOnly JWT cookie) ┌──────────────────┐
  phone / PC ───▶│ web           │ ─────────────────────────────────────▶ │ api (NestJS)     │
-                │ nginx: SPA +  │ ◀──── poll /api/cvs/statuses every 3 s │ HTTP, no LLM     │
-                │ /api proxy    │                                        │ calls            │
+                │ nginx: SPA +  │ ◀──── poll /api/cvs/statuses every 3 s │ HTTP; LLM only   │
+                │ /api proxy    │                                        │ to word answers  │
                 └───────────────┘                                        └──┬────────┬──────┘
                                                                    Drizzle │        │ enqueue
                                                                            ▼        ▼
@@ -83,7 +83,9 @@ desktop, and from any device later.
 - **web** — Vite build served by nginx; nginx also proxies `/api` to `api`, so the cookie is
   first-party and there is no CORS. In dev the Vite proxy does the same.
 - **api** — auth, CV CRUD, PDF ingest/export, questions, enqueuing. Runs migrations on start.
-  No LLM call is made inside a request.
+  The only LLM call inside a request is answer wording: one fast-model call per batch of
+  answers, bounded, with an as-written fallback (§6.5, [adr/0002](adr/0002-answer-wording-inside-the-request.md)).
+  Generation runs in the worker.
 - **worker** — same codebase and Docker image, entry `worker.ts`
   (`NestFactory.createApplicationContext`), loads only the BullMQ processor and the agents.
 - **postgres** — the only source of truth: users, CVs, statuses, questions, attempts.
@@ -128,7 +130,7 @@ schema language from the env file to the LLM output.
 | **Backend** | NestJS 11 | |
 | DB | PostgreSQL 17 + **Drizzle ORM** (`node-postgres`), `drizzle-kit` migrations | explicit SQL fits CAS updates and queue-position queries. Prisma / TypeORM rejected (user's choice) |
 | Queue | BullMQ (`@nestjs/bullmq`) + Redis 7 | |
-| LLM | **Vercel AI SDK v7** (`ai`) + `@ai-sdk/anthropic` directly (no AI Gateway → only one secret) | model from env, default `claude-sonnet-5-5`|
+| LLM | **Vercel AI SDK v7** (`ai`) + `@ai-sdk/anthropic` directly (no AI Gateway → only one secret) | model from env, default `claude-sonnet-5-5`; answers worded by `claude-haiku-4-5` (`ANTHROPIC_FAST_MODEL`) |
 | Auth | `@nestjs/jwt`, `cookie-parser`, **argon2** | JWT in httpOnly cookie, no session table |
 | Rate limits | `@nestjs/throttler` (login, ingest) + count of generations in Postgres | |
 | PDF in | **unpdf** | text layer only, no OCR |
@@ -276,10 +278,26 @@ Question kinds (as in the prototype):
   can be skipped; `confirm` is answered yes/no.
 - Target must point to an existing field, else the question is dropped.
 
-Answer flow (`POST …/answer`, synchronous, in the API):
+Reply flow (`POST …/replies`, synchronous, in the API). The user answers or skips several
+questions in the panel and applies them together; a batch holds 1–12 replies.
 
-1. Ownership, CV `needs_input`, question `open`, answer ≤ 1 000 chars, matches its kind.
-2. `applyAnswer` (pure, in `@cv/shared`, so the server and the frontend mocks apply an answer the
+1. Every reply is checked before anything is written: ownership, CV `needs_input`, question
+   `open`, answer ≤ 1 000 chars and of its kind, a skip only for `text` / `choice` / `multi`, the
+   target still exists. One failure rejects the whole batch.
+2. **Answer wording**, before the transaction: a `text` answer (or the "Other" of a `choice`)
+   whose target is the bullets of an item, the summary or the whole `experience` block goes to one
+   fast-model call for the whole batch (`generateText` with structured output, `ANTHROPIC_FAST_MODEL`,
+   default Haiku 4.5, 15 s). The model sees the question, the answer, the CV language, the target
+   role and the target's context — never the source — and returns, per answer, 1–3 bullets, one
+   summary sentence, a new job (bullets, and title / company / period when the answer states
+   them) or "nothing to add". Our code writes that to the question's target only; nothing else in
+   the CV changes, and a technology named in an answer is not added to `skills`. A worded answer
+   is checked like a claim — its numbers in the answer, its technology-like words in the answer or
+   the source, a new job's title / company in the answer — and anything that fails, times out or
+   errors falls back to step 3 as written. At most 60 answers per user per rolling hour go to the
+   model (an answer counts once sent, whether or not its result is used); past that, answers go
+   in as written. Why synchronous: [adr/0002](adr/0002-answer-wording-inside-the-request.md).
+3. `applyAnswer` for every other answer and every fallback (pure, in `@cv/shared`, so the server and the frontend mocks apply an answer the
    same way): scalar targets (contacts, `period`, `degree`, …) are written directly;
    `summary`/`bullets`/`links` targets append the answer as a sentence/bullet/link. On `skills`,
    never a duplicate (case-insensitive): a `choice` appends `"{label}: {value}"` (e.g.
@@ -289,14 +307,13 @@ Answer flow (`POST …/answer`, synchronous, in the API):
    is a bullet, title, company and period stay empty for the editor. The result stays within
    `CV_LIMITS`: a value is cut to its field's length, and what doesn't fit a list's count is left
    out, so an answer never makes the stored draft invalid.
-3. One transaction: update `data`, append `{question, answer}` to `facts`, question → `answered`,
-   `version + 1`; if no open question remains → `ready` (CAS). Returns the full CV.
+4. One transaction: update `data`, append `{question, answer}` to `facts` for every answer —
+   the raw answer, never the worded text — questions → `answered` / `skipped`, one `version + 1`;
+   if no open question remains → `ready` (CAS). Returns the full CV.
 
-The frontend saves unsaved edits **before** sending an answer (prototype behaviour), so an answer
-never overwrites or is overwritten by local edits.
-
-An AnswerAgent that rewrites the summary or a bullet around the answer was designed and cut
-(§13 row 5): the answer goes into the CV as written. The README lists it under "with more time".
+The frontend keeps replies in the panel (and in `localStorage`) until the user applies them, and
+saves unsaved edits **before** sending the batch (prototype behaviour), so a reply never
+overwrites or is overwritten by local edits.
 
 ### 6.6 Keeping the AI from inventing facts
 
@@ -327,7 +344,8 @@ text, 2 sent to you to confirm, 1 skill moved to suggestions"). The rules per fi
 - **Doesn't:** the UI (English), error messages, the source (any language). Company and
   institution names keep their spelling from the source unless the source itself gives the name
   in the CV language.
-- Answers in another language are inserted as written.
+- Worded answers (§6.5) are written in the CV language; an answer that falls back is inserted as
+  written, in whatever language the user used.
 
 ## 7. Role targeting & match
 
@@ -445,6 +463,13 @@ resumes polling.
     (all eight blocks; items with up/down/remove/add; blocks below contacts with up/down; skills
     as chips; bullets as one textarea, one per line; missing required blocks marked); side panel tabs **Questions · N** / **Match** / **Preview**;
     sticky **save bar** when dirty (Cancel / Save); verification report notice; conflict notice.
+  - *questions panel:* one card per open question (target, text, controls). **Answer** / **Skip**
+    (and "Yes, add it" / "No" on a `confirm`) only mark the card as replied — nothing is sent; a
+    replied card folds to one line with **Change**. A bar sticky at the bottom of the panel,
+    "**Apply N replies**" / Clear, saves unsaved edits first, then sends every reply in one
+    `POST …/replies`; "Updating your CV…" (`aria-live="polite"`) until the CV comes back with the
+    answers worded (§6.5). On an error the replies stay; a `409` drops only the ones whose question
+    closed. Unsent replies survive a reload (`localStorage`, per user and CV).
 
 ### Layout
 
@@ -481,8 +506,7 @@ Tests by importance: `backend/docs/architecture.md` §8 (verifier, isolation, st
 generation with a fake model…), `frontend/docs/architecture.md` §9, `shared` unit tests next to
 each module.
 
-Already cut: AnswerAgent (answers go in as written). If time runs short, cut next in this order
-(reliability items above are never cut):
+If time runs short, cut next in this order (reliability items above are never cut):
 1. Suggested roles / `fromCvId`.
 2. `GET /api/usage`, sessionStorage autosave.
 3. Match panel UI (requirements still generated and used for the `multi` question).
@@ -495,7 +519,7 @@ Already cut: AnswerAgent (answers go in as written). If time runs short, cut nex
 | 2 | Match computation | **confirmed:** deterministic keyword match in `shared/match.ts`, no model score |
 | 3 | `retrying` as its own status | **confirmed:** keep (user sees "attempt 2 of 3") |
 | 4 | PDF intake | **confirmed:** server extracts, user reviews text before generation (prototype UX + server-side handling of untrusted files) |
-| 5 | AnswerAgent | **cut by user:** answers are inserted as written; README lists it under "with more time" |
+| 5 | Answer wording | **decided by user (2026-10-07):** replies are applied in batches; free-text answers to bullets, the summary or the experience block are worded by one fast-model call inside the request, as-written fallback (§6.5, [adr/0002](adr/0002-answer-wording-inside-the-request.md)); replaces "AnswerAgent cut" |
 | 6 | `shared/` as a workspace package | **confirmed by user:** yes — status machine, schemas and `computeMatch` must be identical on both sides; frontend and backend stay independent subprojects with their own Dockerfile and compose file (§3) |
 | 7 | UI language | **confirmed:** English (spec and reviewers are English-speaking) |
 | 7a | CV language | **confirmed by user:** chosen at creation, default English, sent to the server and the agent (§6.7); initial language list to confirm |

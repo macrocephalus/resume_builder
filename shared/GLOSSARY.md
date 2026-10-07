@@ -40,6 +40,10 @@ _Avoid_: clarification, prompt, task
 A statement about the user that came from their answer to a question; it belongs to one CV and, together with the source, is the only thing the draft may rely on.
 _Avoid_: user answer, memory, note
 
+**Answer wording**:
+Turning the user's answer to a question into CV text in the CV's language; only the part of the CV the question points at changes, and the fact keeps the answer as the user wrote it.
+_Avoid_: AnswerAgent, answer polishing, rewrite
+
 **Suggested role**:
 Another role the draft of a CV also fits, offered to the user as "Also fits"; picking one starts a new CV for it, so the CV's own target role never changes.
 _Avoid_: related role, alternative role, recommendation

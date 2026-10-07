@@ -281,28 +281,42 @@ Email очищується від пробілів на краях і перев
 
 ## Запитання
 
-### `POST /api/cvs/:id/questions/:questionId/answer`
-Тіло залежить від типу запитання:
+### `POST /api/cvs/:id/replies` — відповісти на запитання й пропустити їх разом
+Користувач відповідає на кілька запитань в інтерфейсі й застосовує їх одним запитом. **Reply** —
+це відповідь або пропуск (`answer: null`) одного відкритого запитання.
 ```jsonc
-{ "kind": "text",    "value": "+380 67 123 45 67" }
-{ "kind": "choice",  "value": "B2" }                    // одне з options
-{ "kind": "choice",  "other": "Native-level Polish" }   // варіант «Інше»
-{ "kind": "multi",   "values": ["Docker", "PostgreSQL"], "other": "Kafka, gRPC" }
-{ "kind": "confirm", "value": true }
+{ "replies": [
+  { "questionId": "…", "answer": { "kind": "text",    "value": "about 300 companies, 2M payments a month" } },
+  { "questionId": "…", "answer": { "kind": "choice",  "value": "B2" } },             // одне з options
+  { "questionId": "…", "answer": { "kind": "choice",  "other": "Native-level Polish" } },
+  { "questionId": "…", "answer": { "kind": "multi",   "values": ["Docker"], "other": "Kafka, gRPC" } },
+  { "questionId": "…", "answer": { "kind": "confirm", "value": true } },
+  { "questionId": "…", "answer": null }                                              // пропуск
+] }
 ```
-- Резюме в статусі `needs_input`, запитання в статусі `open` і саме цього `kind`, інакше
-  `409 INVALID_STATE`. Запитання, ціль якого вже не існує (його елемент видалено) →
-  `409 INVALID_STATE`.
-- `value`/`other` 1–1 000 символів; `choice` надсилає `value` (одне з `options`) **або** `other`;
-  `values` ⊆ `options`, ≥ 1 елемент, якщо не задано `other`. Інакше `400`.
-  (`answerSchemaFor(question)` у `@cv/shared`.)
-- Синхронний запит (зміни застосовуються, як описано в
-  [architecture.md §6.5](architecture.md#65-питання-та-відповіді)); відповідь потрапляє в CV як є.
-- `200 { "cv": Cv }` — поле оновлено, запитання `answered`, `version + 1`, статус може стати `ready`.
-
-### `POST /api/cvs/:id/questions/:questionId/skip`
-Без тіла. Лише `text` / `choice` / `multi` (на `confirm` потрібно відповісти). Запитання →
-`skipped`, поле лишається порожнім. `200 { "cv": Cv }`; статус може стати `ready`.
+- 1–12 reply, кожен `questionId` один раз (`repliesBodySchema` у `@cv/shared`). Для кожного:
+  `value`/`other` 1–1 000 символів; `choice` надсилає `value` (одне з `options`) **або** `other`;
+  `values` ⊆ `options`, ≥ 1 елемент, якщо не задано `other` (`answerSchemaFor(question)`);
+  пропуск лише для `text` / `choice` / `multi` (на `confirm` потрібно відповісти). Інакше `400`,
+  ключі `details.fields` — `replies.<індекс>…`.
+- Резюме в статусі `needs_input`; кожне запитання належить йому, у статусі `open` і того ж `kind`,
+  що й reply, а його ціль ще існує (елемент не видалено); інакше `404` / `409 INVALID_STATE`.
+- **Все або нічого:** якщо хоч один reply не пройшов перевірку, нічого не застосовується.
+- **Answer wording** ([architecture.md §6.5](architecture.md#65-питання-та-відповіді)): відповідь
+  `text` або «Інше» в `choice`, ціль якої — пункти елемента, summary або весь блок досвіду,
+  перетворюється на текст CV мовою CV одним викликом швидкої моделі на весь пакет — 1–3 пункти,
+  одне речення summary або нова робота з посадою, компанією й датами, якщо відповідь їх містить;
+  відповідь, у якій нічого немає для CV, нічого не додає. Змінюється лише ціль запитання. Усі
+  інші відповіді, а також відповідь, оформлення якої не вдалося, перевищило час або не
+  підтверджується самою відповіддю, вставляються як є (`applyAnswer`). Відповідь API не каже, яка
+  саме.
+- Синхронний запит: зазвичай кілька секунд, оформлення — не довше ~15 с. Інтерфейс показує
+  прогрес і не обриває запит раніше ніж через 30 с.
+- `facts` і `answer` кожного запитання зберігають те, що написав користувач, а не оформлений текст.
+- `200 { "cv": Cv }` — цілі оновлено, запитання `answered` / `skipped`, один `version + 1`, статус
+  стає `ready`, якщо відкритих запитань не лишилося.
+- `429` через оформлення не буває: після 60 оформлених відповідей користувача за ковзну годину
+  відповіді вставляються як є.
 
 ---
 
@@ -325,8 +339,7 @@ Email очищується від пробілів на краях і перев
 | DELETE | `/api/cvs/:id` | ✓ | видалити |
 | POST | `/api/cvs/:id/retry` | ✓ | повторити невдалу генерацію |
 | GET | `/api/cvs/:id/pdf` | ✓ | завантажити PDF формату A4 |
-| POST | `/api/cvs/:id/questions/:qid/answer` | ✓ | відповісти на запитання |
-| POST | `/api/cvs/:id/questions/:qid/skip` | ✓ | пропустити запитання |
+| POST | `/api/cvs/:id/replies` | ✓ | відповісти на запитання й пропустити їх одним пакетом |
 
 Не частина контракту: у розробці api також описує себе — Swagger UI на `/api/docs` і документ
 OpenAPI на `/api/docs-json` (`API_DOCS=true`, який вмикає `pnpm dev`; за замовчуванням вимкнено,

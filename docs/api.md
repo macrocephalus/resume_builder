@@ -271,27 +271,41 @@ selectable text, rendered from the **saved** `data` (the client saves first).
 
 ## Questions
 
-### `POST /api/cvs/:id/questions/:questionId/answer`
-Body depends on the question kind:
+### `POST /api/cvs/:id/replies` — answer and skip questions together
+The user replies to several questions in the UI and applies them in one request. A **reply** is
+an answer or a skip (`answer: null`) of one open question.
 ```jsonc
-{ "kind": "text",    "value": "+380 67 123 45 67" }
-{ "kind": "choice",  "value": "B2" }                    // one of options
-{ "kind": "choice",  "other": "Native-level Polish" }   // "Other"
-{ "kind": "multi",   "values": ["Docker", "PostgreSQL"], "other": "Kafka, gRPC" }
-{ "kind": "confirm", "value": true }
+{ "replies": [
+  { "questionId": "…", "answer": { "kind": "text",    "value": "about 300 companies, 2M payments a month" } },
+  { "questionId": "…", "answer": { "kind": "choice",  "value": "B2" } },             // one of options
+  { "questionId": "…", "answer": { "kind": "choice",  "other": "Native-level Polish" } },
+  { "questionId": "…", "answer": { "kind": "multi",   "values": ["Docker"], "other": "Kafka, gRPC" } },
+  { "questionId": "…", "answer": { "kind": "confirm", "value": true } },
+  { "questionId": "…", "answer": null }                                              // skip
+] }
 ```
-- CV `needs_input`, question `open` and of that `kind`, else `409 INVALID_STATE`. A question
-  whose target no longer exists (its item was removed) → `409 INVALID_STATE`.
-- `value`/`other` 1–1 000 chars; `choice` sends `value` (one of `options`) **or** `other`;
-  `values` ⊆ `options`, ≥ 1 item unless `other` is given. Otherwise `400`.
-  (`answerSchemaFor(question)` in `@cv/shared`.)
-- Synchronous (applied as described in [architecture.md §6.5](architecture.md#65-questions--answers));
-  the answer goes into the CV as written.
-- `200 { "cv": Cv }` — field updated, question `answered`, `version + 1`, status may become `ready`.
-
-### `POST /api/cvs/:id/questions/:questionId/skip`
-No body. `text` / `choice` / `multi` only (`confirm` must be answered). Question → `skipped`,
-field stays empty. `200 { "cv": Cv }`; status may become `ready`.
+- 1–12 replies, each `questionId` once (`repliesBodySchema` in `@cv/shared`). Per reply:
+  `value`/`other` 1–1 000 chars; `choice` sends `value` (one of `options`) **or** `other`;
+  `values` ⊆ `options`, ≥ 1 item unless `other` is given (`answerSchemaFor(question)`); a skip
+  only for `text` / `choice` / `multi` (`confirm` must be answered). Otherwise `400`,
+  `details.fields` keyed by `replies.<index>…`.
+- CV `needs_input`; every question belongs to it, is `open` and of the reply's `kind`, and its
+  target still exists (its item wasn't removed); else `404` / `409 INVALID_STATE`.
+- **All or nothing:** if any reply fails a check, nothing is applied.
+- **Answer wording** ([architecture.md §6.5](architecture.md#65-questions--answers)): a `text`
+  answer, or the "Other" of a `choice`, whose target is the bullets of an item, the summary or
+  the whole experience block is turned into CV text in the CV's language by one fast-model call
+  for the whole batch — 1–3 bullets, one summary sentence, or a new job with the title, company
+  and dates the answer gives; an answer with nothing for the CV adds nothing. Only the question's
+  target changes. Every other answer, and any answer whose wording fails, times out or isn't
+  backed by the answer, goes in as written (`applyAnswer`). The response doesn't say which.
+- Synchronous: usually a few seconds, at most ~15 s for the wording. The UI shows progress and
+  doesn't time out before 30 s.
+- `facts` and each question's `answer` keep what the user wrote, never the worded text.
+- `200 { "cv": Cv }` — targets updated, questions `answered` / `skipped`, one `version + 1`,
+  status `ready` when no open question is left.
+- No `429` for wording: past 60 worded answers per user in a rolling hour, answers go in as
+  written.
 
 ---
 
@@ -314,8 +328,7 @@ field stays empty. `200 { "cv": Cv }`; status may become `ready`.
 | DELETE | `/api/cvs/:id` | ✓ | delete |
 | POST | `/api/cvs/:id/retry` | ✓ | retry failed generation |
 | GET | `/api/cvs/:id/pdf` | ✓ | download A4 PDF |
-| POST | `/api/cvs/:id/questions/:qid/answer` | ✓ | answer a question |
-| POST | `/api/cvs/:id/questions/:qid/skip` | ✓ | skip a question |
+| POST | `/api/cvs/:id/replies` | ✓ | answer and skip questions in one batch |
 
 Not part of the contract: in development the api also describes itself, the Swagger UI at
 `/api/docs` and the OpenAPI document at `/api/docs-json` (`API_DOCS=true`, which `pnpm dev` sets;

@@ -120,9 +120,10 @@ export type GenerationStage = (typeof GENERATION_STAGES)[number];
   the hourly limit), delete.
 
 ### `needs_input` — "Needs your answers"
-- **Backend:** draft saved, open questions exist. Each answer/skip updates its field
-  (see [architecture.md §6.5](architecture.md#65-questions--answers)); when the last open question
-  is closed, the same transaction sets `ready`. A manual save that removes an item skips the
+- **Backend:** draft saved, open questions exist. Answers and skips come in batches
+  (`POST …/replies`); each updates its own target
+  (see [architecture.md §6.5](architecture.md#65-questions--answers)); when a batch closes the
+  last open question, the same transaction sets `ready`. A manual save that removes an item skips the
   questions about it, which can close the last one too.
 - **Frontend:** warning badge with the open-question count; editor, questions panel, match panel,
   preview, Download PDF. No polling.
@@ -147,7 +148,7 @@ The API enforces this table; anything else returns `409 INVALID_STATE`. Delete i
 | `POST /api/cvs/:id/retry` | | | | ✓ | | |
 | `PATCH /api/cvs/:id` | | | | | ✓ | ✓ |
 | `GET /api/cvs/:id/pdf` | | | | | ✓ | ✓ |
-| `POST …/questions/:qid/answer`, `/skip` | | | | | ✓ | |
+| `POST …/replies` | | | | | ✓ | |
 | `POST /api/cvs` with `fromCvId` (new CV, same source) | | | | | ✓ | ✓ |
 
 ## 4. How a status changes
