@@ -111,11 +111,14 @@ The most important ones, in order:
 browser ──/api, same origin, httpOnly cookie──▶ web (nginx: SPA + /api proxy)
                                                  │
                                                  ▼
-             Claude Haiku ◀── answer wording ── api (NestJS) ──▶ PostgreSQL (all data, source of truth)
+         Claude Haiku 4.5 ◀── answer wording ── api (NestJS) ──▶ PostgreSQL (all data, source of truth)
                                                  │ enqueue           ▲
                                                  ▼                   │
-                                         Redis (queue only) ──▶ worker ──▶ Claude (the draft)
+                                         Redis (queue only) ──▶ worker ──▶ Claude Sonnet 5.5 (the draft)
 ```
+
+Models: the draft uses `ANTHROPIC_MODEL` (default `claude-sonnet-5-5`), answer wording uses
+`ANTHROPIC_FAST_MODEL` (default `claude-haiku-4-5`). Both can be changed in `.env`.
 
 - **api** handles auth, PDF intake, CVs, questions, the PDF export and usage. It never waits for
   the draft: "create a CV" saves the request, enqueues a job and answers `202` at once. Its only
