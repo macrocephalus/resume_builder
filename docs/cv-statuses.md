@@ -153,7 +153,7 @@ The API enforces this table; anything else returns `409 INVALID_STATE`. Delete i
 
 ## 4. How a status changes
 
-- **One writer.** Only `CvStatusService` changes `cvs.status`. The worker, the answer endpoint
+- **One writer.** Only `CvStatusService` changes `cvs.status`. The worker, the replies endpoint
   and the manual save call it; it checks `canTransition` before writing.
 - **Compare-and-set.** Every transition is
   `UPDATE cvs SET status = :to, … WHERE id = :id AND status = ANY(:allowedFrom)`.
