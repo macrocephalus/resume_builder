@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { answerSchema, answerSchemaFor, questionSchema, questionTargetSchema, type Question } from './index'
+import {
+  answerSchema,
+  answerSchemaFor,
+  questionSchema,
+  questionTargetSchema,
+  repliesBodySchema,
+  REPLY_LIMITS,
+  type Question,
+} from './index'
 import { ids } from './testing/draft'
 
 const accepts = (body: unknown) => answerSchema.safeParse(body).success
@@ -122,5 +130,50 @@ describe('question', () => {
     for (const answer of ['B2', ['Docker'], true, null]) {
       expect(questionSchema.safeParse({ ...question, status: 'answered', answer }).success).toBe(true)
     }
+  })
+})
+
+describe('replies body', () => {
+  const uuid = (n: number) => `${String(n).padStart(8, '0')}-0000-4000-8000-000000000000`
+  const reply = (n: number, answer: unknown = { kind: 'text', value: 'yes' }) => ({ questionId: uuid(n), answer })
+  const accepts = (body: unknown) => repliesBodySchema.safeParse(body).success
+
+  it('takes a skip as a null answer', () => {
+    expect(repliesBodySchema.parse({ replies: [reply(1, null)] })).toEqual({
+      replies: [{ questionId: uuid(1), answer: null }],
+    })
+  })
+
+  it('takes a mix of kinds and skips', () => {
+    expect(
+      accepts({
+        replies: [
+          reply(1, { kind: 'text', value: 'about 300 companies' }),
+          reply(2, { kind: 'choice', value: 'B2' }),
+          reply(3, { kind: 'multi', values: ['Docker'], other: 'Kafka' }),
+          reply(4, { kind: 'confirm', value: true }),
+          reply(5, null),
+        ],
+      }),
+    ).toBe(true)
+  })
+
+  it('rejects an empty list and more than 12 replies', () => {
+    expect(accepts({ replies: [] })).toBe(false)
+    const many = Array.from({ length: REPLY_LIMITS.batch + 1 }, (_, i) => reply(i + 1))
+    expect(accepts({ replies: many })).toBe(false)
+    expect(accepts({ replies: many.slice(0, REPLY_LIMITS.batch) })).toBe(true)
+  })
+
+  it('rejects the same question twice, pointing at the duplicate', () => {
+    const result = repliesBodySchema.safeParse({ replies: [reply(1), reply(2), reply(1, null)] })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues.map((issue) => issue.path)).toEqual([['replies', 2, 'questionId']])
+  })
+
+  it('rejects an invalid answer inside a reply, under its index', () => {
+    const result = repliesBodySchema.safeParse({ replies: [reply(1), reply(2, { kind: 'text', value: '' })] })
+    expect(result.success).toBe(false)
+    expect(result.error?.issues[0]?.path.slice(0, 3)).toEqual(['replies', 1, 'answer'])
   })
 })

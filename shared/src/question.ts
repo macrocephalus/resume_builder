@@ -18,6 +18,11 @@ export const ANSWER_LIMITS = {
   text: 1000,
 } as const
 
+export const REPLY_LIMITS = {
+  /** replies per `POST /api/cvs/:id/replies`: the cap of open questions per CV */
+  batch: 12,
+} as const
+
 /**
  * The part of the draft a question is about. `itemId` points at one item of an item block;
  * `field` names a field of the block or of that item (`phone`, `period`).
@@ -74,7 +79,7 @@ export const multiAnswerSchema = z
 
 export const confirmAnswerSchema = z.object({ kind: z.literal('confirm'), value: z.boolean() })
 
-/** Body of `POST /api/cvs/:id/questions/:questionId/answer`. */
+/** The answer of one reply; the server checks it again against its question with `answerSchemaFor`. */
 export const answerSchema = z.discriminatedUnion('kind', [
   textAnswerSchema,
   choiceAnswerSchema,
@@ -105,3 +110,27 @@ export const answerSchemaFor = (question: Pick<Question, 'kind' | 'options'>) =>
     }
   })
 }
+
+/** One reply of a batch: an answer, or a skip as `null`. */
+export const replySchema = z.object({ questionId: z.uuid(), answer: answerSchema.nullable() })
+
+export type Reply = z.infer<typeof replySchema>
+
+/** Body of `POST /api/cvs/:id/replies`: 1–12 replies, each question once. */
+export const repliesBodySchema = z
+  .object({ replies: z.array(replySchema).min(1).max(REPLY_LIMITS.batch) })
+  .superRefine((body, ctx) => {
+    const seen = new Set<string>()
+    body.replies.forEach((reply, index) => {
+      if (seen.has(reply.questionId)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'This question is replied to more than once',
+          path: ['replies', index, 'questionId'],
+        })
+      }
+      seen.add(reply.questionId)
+    })
+  })
+
+export type RepliesBody = z.infer<typeof repliesBodySchema>
