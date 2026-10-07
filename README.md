@@ -16,6 +16,13 @@ downloads an A4 PDF.
 - [How AI tools were used](#how-ai-tools-were-used)
 - [Documents](#documents)
 
+The task's five README questions are answered in: [Run it](#run-it) and
+[Run the tests](#run-the-tests); [Architecture](#architecture) and
+[Main decisions](#main-decisions);
+[Keeping the AI from inventing facts](#keeping-the-ai-from-inventing-facts);
+[What was simplified](#what-was-simplified-and-what-more-time-would-change);
+[How AI tools were used](#how-ai-tools-were-used).
+
 ## Run it
 
 You need **Docker** (with Compose v2) and an **Anthropic API key**. Nothing else is installed on
@@ -65,7 +72,9 @@ docker compose up -d postgres redis
 pnpm --filter backend test:e2e   # own database and queue, a scripted model, no key
 ```
 
-About 770 tests in all.
+About 850 tests in all: `shared` 163, backend 204 unit and 162 end-to-end, frontend 324.
+`pnpm test` runs the three packages at once; on a slow machine a frontend or PDF test can hit its
+timeout under that load. Run that package alone (`pnpm --filter frontend test`) to confirm.
 
 The most important ones, in order:
 1. **The fact verifier.** An invented bullet becomes a `confirm` question, an unknown skill
@@ -170,7 +179,10 @@ The UI shows what happened, for example "12 bullets confirmed by quotes from you
 you to confirm". **Known limit:** a quote proves that a fact is in the source, not that its
 translation is faithful. Translation quality is trusted to the model; numbers and names are not.
 The same holds for a worded answer: the check covers numbers, technology names, titles and
-companies, not whether the phrasing says only what the answer meant.
+companies, not whether the phrasing says only what the answer meant. In a live run, the answer
+"about 300 companies, 2M transactions a month, 40 partner banks" gave the bullet it should, and
+also "Architected the payments API to handle enterprise-scale throughput", which the answer does
+not say. It passed, since it names no new number or technology.
 
 ## Failures and untrusted input
 
@@ -211,6 +223,8 @@ Cut or simplified, on purpose:
 - **Signup** says when an email is already taken (there is no email verification to hide it
   behind).
 - **PDF parsing** runs on the api's event loop; a 10-page limit keeps it short.
+- **Replies not applied yet** are kept in the browser (`localStorage`), not on the server: another
+  device sees only the applied ones.
 - **Translation faithfulness** is trusted to the model (see above).
 - **Job order:** jobs are ordered most recent first. Inside a job, what matters for the role comes
   first, and the model orders the blocks by relevance.
@@ -247,6 +261,14 @@ one loop, written down in `workflow.md`:
    whole-stack run with the real Claude found what unit tests missed, and each finding was fixed
    in its repo; for example the CV list always showed 0 open questions, and the skills were asked
    about twice.
+6. **A separate review before shipping a feature.** For batched replies, an agent cross-checked the
+   backend, the frontend and the frontend's mock API against the contract, and a live run went
+   through nginx with the real model. The contract matched. The review found three frontend bugs
+   in rare paths, each fixed with a regression test: a CV deleted on another device kept answering
+   "some questions changed" instead of Not found; Apply did nothing, without a word, when the save
+   before it closed every replied question; unapplied answers stayed in the browser after logout.
+   The live run found the worded bullet that says more than the answer (above); it is documented
+   as a known limit rather than hidden.
 
 ## Documents
 
