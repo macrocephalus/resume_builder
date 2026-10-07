@@ -5,6 +5,18 @@ a target role. Claude writes the draft in a background job. Anything the source 
 becomes a question to the user instead of an invented fact. The user answers, edits any field and
 downloads an A4 PDF.
 
+> [!IMPORTANT]
+> **Clone with `--recurse-submodules`.** `backend/` and `frontend/` are git submodules (separate
+> repositories). A plain `git clone` leaves them empty and the build fails.
+>
+> ```sh
+> git clone --recurse-submodules https://github.com/macrocephalus/resume_builder.git
+> ```
+>
+> Already cloned without it? Run `git submodule update --init` in the repo root.
+> HTTPS works without a GitHub SSH key: the submodule URLs are relative, so they follow the
+> protocol of the root clone.
+
 **Contents:**
 - [Run it](#run-it)
 - [Run the tests](#run-the-tests)
@@ -29,7 +41,7 @@ You need **Docker** (with Compose v2) and an **Anthropic API key**. Nothing else
 the host.
 
 ```sh
-git clone --recurse-submodules https://github.com/macrocephalus/resume_builder.git
+git clone --recurse-submodules https://github.com/macrocephalus/resume_builder.git   # pulls backend/ and frontend/ too
 cd resume_builder
 cp .env.example .env          # then set ANTHROPIC_API_KEY=sk-ant-… in .env
 docker compose up --build     # first start: builds the images, ~2–3 min
